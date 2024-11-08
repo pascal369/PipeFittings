@@ -9,7 +9,7 @@ import FreeCAD
 
 class PipeFittingsShowCommand:
     def GetResources(self):
-        from init import module_path
+        from Init import module_path
         #module_path = os.path.dirname(os.path.abspath(__file__))
         #print(os.path)
         return { 
