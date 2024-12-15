@@ -2,16 +2,15 @@
 #*    Copyright (C) 2023 
 #*    This library is free software
 #***************************************************************************
-
+import inspect
 import os
 import FreeCADGui
 import FreeCAD
 
 class PipeFittingsShowCommand:
     def GetResources(self):
-        from Init import module_path
-        #module_path = os.path.dirname(os.path.abspath(__file__))
-        #print(os.path)
+        file_path = inspect.getfile(inspect.currentframe())
+        module_path=os.path.dirname(file_path)
         return { 
           'Pixmap': os.path.join( module_path,"icons", "PipeFittings.svg"),
           'MenuText': "PipeFittings",
@@ -30,15 +29,17 @@ class PipeFittingsShowCommand:
         except Exception as e:
           FreeCAD.Console.PrintError(str(e) + "\n")
 
+        file_path = inspect.getfile(inspect.currentframe())
+        module_path=os.path.dirname(file_path)
+
     def IsActive(self):
         import PipeFittings
-        #SteelStructure
         return not FreeCAD.ActiveDocument is None
 
 class PipeFittingsWB(FreeCADGui.Workbench):
     def __init__(self):
-        from Init import module_path
-        print(module_path)
+        file_path = inspect.getfile(inspect.currentframe())
+        module_path=os.path.dirname(file_path)
         self.__class__.Icon = os.path.join( module_path,"icons", "PipeFittings.svg")
         self.__class__.MenuText = "PipeFittings"
         self.__class__.ToolTip = "PipeFittings by Pascal"
@@ -61,9 +62,5 @@ class PipeFittingsWB(FreeCADGui.Workbench):
 
     def GetClassName(self): 
         return "Gui::PythonWorkbench"
-
-freeCadVersion = int(FreeCAD.Version()[1])
-pythonVersion = int(sys.version[0:1])
-
 FreeCADGui.addWorkbench(PipeFittingsWB())
 FreeCADGui.addCommand("PipeFittings_Show", PipeFittingsShowCommand())
