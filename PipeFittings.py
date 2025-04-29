@@ -27,20 +27,20 @@ Pipe_type=['Welded joint','Threaded fitting','PVC fittings','Circular duct fitti
 class Ui_Dialog(object):#05
     def setupUi(self, Dialog):
         Dialog.setObjectName("Dialog")
-        Dialog.resize(270, 340)
+        Dialog.resize(300, 340)
         Dialog.move(1000, 0)
         #種別　type
         self.label_typ= QtGui.QLabel('種別(Type)',Dialog)
         self.label_typ.setGeometry(QtCore.QRect(20, 0, 250, 22))
         self.comboBox_typ = QtGui.QComboBox(Dialog)
-        self.comboBox_typ.setGeometry(QtCore.QRect(130, 0, 120, 22))
+        self.comboBox_typ.setGeometry(QtCore.QRect(110, 0, 180, 22))
 
         #管材   
         self.label_lst= QtGui.QLabel('管材(Fittings)',Dialog)
         self.label_lst.setGeometry(QtCore.QRect(20, 25, 120, 22))
         self.label_lst.setObjectName("label_lst")
         self.comboBox_lst = QtGui.QComboBox(Dialog)
-        self.comboBox_lst.setGeometry(QtCore.QRect(130, 25, 120, 22))
+        self.comboBox_lst.setGeometry(QtCore.QRect(110, 25, 180, 22))
         self.comboBox_lst.setObjectName("comboBox_lst")
         self.label_l= QtGui.QLabel(Dialog)
         self.label_l.setGeometry(QtCore.QRect(130, 48, 120, 22))
@@ -49,7 +49,7 @@ class Ui_Dialog(object):#05
         self.label_material.setGeometry(QtCore.QRect(20, 70, 120, 22))
         self.label_material.setObjectName("label_material")
         self.comboBox_material = QtGui.QComboBox(Dialog)
-        self.comboBox_material.setGeometry(QtCore.QRect(130, 70, 120, 22))
+        self.comboBox_material.setGeometry(QtCore.QRect(110, 70, 180, 22))
         self.comboBox_material.setObjectName("comboBox_material")
         
         ta=WeldStl_data.mate[0:2]
@@ -61,14 +61,14 @@ class Ui_Dialog(object):#05
         self.label_standard.setGeometry(QtCore.QRect(20, 93, 120, 22))
         self.label_standard.setObjectName("label_standard")
         self.comboBox_standard = QtGui.QComboBox(Dialog)
-        self.comboBox_standard.setGeometry(QtCore.QRect(130, 93, 120, 22))
+        self.comboBox_standard.setGeometry(QtCore.QRect(110, 93, 180, 22))
         self.comboBox_standard.setObjectName("comboBox_standard")
         #口径
         self.label_dia= QtGui.QLabel('口径(Diameter)',Dialog)
         self.label_dia.setGeometry(QtCore.QRect(20, 116, 120, 22))
         self.label_dia.setObjectName("label_standard")
         self.comboBox_dia = QtGui.QComboBox(Dialog)
-        self.comboBox_dia.setGeometry(QtCore.QRect(130, 116, 120, 20))
+        self.comboBox_dia.setGeometry(QtCore.QRect(110, 116, 180, 20))
         self.comboBox_dia.setObjectName("comboBox_dia")
 
         #切管
@@ -116,16 +116,10 @@ class Ui_Dialog(object):#05
 
         self.comboBox_material.setCurrentIndex(1)
         self.comboBox_material.currentIndexChanged[int].connect(self.on_lst)
-        #self.comboBox_material.currentIndexChanged[int].connect(self.on_lst3)
-        #self.comboBox_material.currentIndexChanged[int].connect(self.on_standard)
-        #self.comboBox_material.currentIndexChanged[int].connect(self.on_material)
         self.comboBox_material.setCurrentIndex(0)
-        
-        #self.comboBox_lst.setCurrentIndex(1)
+
         self.comboBox_lst.currentIndexChanged[int].connect(self.on_lst)
-        #self.comboBox_lst.currentIndexChanged[int].connect(self.on_lst2)
         self.comboBox_lst.currentIndexChanged[int].connect(self.on_standard)
-        #self.comboBox_lst.setCurrentIndex(0)
 
         self.comboBox_standard.setCurrentIndex(1)
         self.comboBox_standard.currentIndexChanged[int].connect(self.on_standard)
@@ -220,10 +214,7 @@ class Ui_Dialog(object):#05
                         myShape.standard=st[:6] 
                         myShape.standard2=st[7:]
 
-                        # obj.standard=WeldStl_data.Tube_stainless
-                        # i=self.comboBox_standard.currentIndex()
-                        # obj.standard=WeldStl_data.Tube_stainless[i] 
-                                
+                               
                 try:
                    L0=self.spinBoxL.value()
                    myShape.L=str(L0)
@@ -231,7 +222,6 @@ class Ui_Dialog(object):#05
                    myShape=None
             except:
                 return                
-
         
         App.ActiveDocument.recompute() 
            
@@ -290,7 +280,6 @@ class Ui_Dialog(object):#05
             L=''                    
 
     def on_typ(self):
-        
         self.comboBox_lst.clear()
         typ=self.comboBox_typ.currentText()
         self.comboBox_standard.clear()
@@ -323,7 +312,6 @@ class Ui_Dialog(object):#05
             self.comboBox_material.addItems(ta)         
 
     def on_material(self): 
-        
         typ=self.comboBox_typ.currentText()
         self.comboBox_standard.cear()
         if typ=='PVC fittings':
@@ -333,9 +321,7 @@ class Ui_Dialog(object):#05
                 self.comboBox_lst.addItems(Pvc_data.lst_ts) 
             elif material=='DV': 
                 self.comboBox_lst.addItems(Pvc_data.lst_dv)
-        
 
-        
     def on_lst(self):
         global xlc
         st=self.comboBox_standard.currentText()
@@ -354,6 +340,7 @@ class Ui_Dialog(object):#05
             joined_path = os.path.join(base, "pipe_data",pic)
             self.label_img.setPixmap(QtGui.QPixmap(joined_path))
         elif typ=='Threaded fitting':
+            self.comboBox_standard.clear() 
             try:
                 b=ThreadStl_data.l_lst[key] 
                 self.label_l.setText(QtGui.QApplication.translate("Dialog", b, None))
@@ -390,12 +377,15 @@ class Ui_Dialog(object):#05
             if key=='00' or key=='09':#---------------------------------------------------------
                 material=self.comboBox_material.currentText()
                 if material=='Carbon steel':
-                    ta=WeldStl_data.flg_carbon
+                    if key=='00':
+                        ta=WeldStl_data.flg_carbon
+                    elif key=='09':
+                        ta=WeldStl_data.s_flg_carbon    
                 elif material=='Stainless steel':
                     if key=='00':
                         ta=WeldStl_data.flg_stainless
                     elif key=='09':
-                        ta=WeldStl_data.flg_stainless[:3]
+                        ta=WeldStl_data.s_flg_stainless
 
             elif key=='01':
                 material=self.comboBox_material.currentText()
@@ -430,7 +420,6 @@ class Ui_Dialog(object):#05
                     ta=WeldStl_data.Tube_stainless
 
             elif key=='06' or key=='07':
-                #return
                 
                 material=self.comboBox_material.currentText()
                 if material=='Carbon steel':
@@ -542,16 +531,9 @@ class Ui_Dialog(object):#05
             elif key=='10' :
                 ta=Duct_data.damper_st    
 
-            #self.comboBox_standard.clear()
-            #try:
-            #    self.comboBox_standard.addItems(ta)
-            #except:
-            #    pass  
         try:
-            #self.comboBox_standard.clear()
+            self.comboBox_standard.clear()
             self.comboBox_standard.addItems(ta)
-            print('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb')
-            #self.comboBox_dia.clear()
         except:
             pass    
 
@@ -567,7 +549,7 @@ class Ui_Dialog(object):#05
             if key=='00' or key=='09' :
                 if material=='Carbon steel':
                     if st=='JIS2k':
-                        dia=WeldStl_data.flg_d[17:]
+                        dia=WeldStl_data.flg_d[18:]
                     elif st=='JIS5k':
                         dia=WeldStl_data.flg_d[:25]
                     elif st=='JIS7.5k' :
@@ -1173,7 +1155,6 @@ class Ui_Dialog(object):#05
         
     def f_create(self):
         typ=self.comboBox_typ.currentText()
-        #lsky=self.lineEdit.text()
         key = self.comboBox_lst.currentText()[:2]
 
         if typ=='Welded joint':
@@ -1472,13 +1453,11 @@ class Ui_Dialog(object):#05
                 obj.dia=dia[i]
                 obj.addProperty("App::PropertyEnumeration", "standard",label)
                 if self.comboBox_material.currentIndex()==0:
-                    obj.standard=WeldStl_data.flg_carbon
+                    obj.standard=ThreadStl_data.flg
                     i=self.comboBox_standard.currentIndex()
-                    obj.standard=WeldStl_data.flg_carbon[i]
+                    obj.standard=ThreadStl_data.flg[i]
                 elif self.comboBox_material.currentIndex()==1:
-                    obj.standard=WeldStl_data.flg_stainless
-                    i=self.comboBox_standard.currentIndex()
-                    obj.standard=WeldStl_data.flg_stainless[i]  
+                    return
 
             elif key=='01' :
                 label = 'Elbow'
