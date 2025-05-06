@@ -589,6 +589,7 @@ class threaded_p:
                 cutter_01(self)
                 c2=c00
                 c1=c1.cut(c2)
+                pass
         elif key=='01':
             if st=='45L' or st=='90L':
                 key_1=dia
@@ -660,6 +661,7 @@ class threaded_p:
                     c2=c00
                     c2.Placement=App.Placement(App.Vector(p5),App.Rotation(App.Vector(0,1,0),180+2*s0))
                     c1=c1.cut(c2)
+                    
             elif st=='90SL':
                 sa=ThreadStl_data.elbows_sl[key_1]
                 A=sa[0]
@@ -732,6 +734,7 @@ class threaded_p:
                     c2=c00
                     c2.Placement=App.Placement(App.Vector(B,0,A),App.Rotation(App.Vector(0,1,0),270))
                     c1=c1.fuse(c2)
+                    
             elif st=='90RL':
                 xi=dia.find('x')
                 key_1=dia[:xi]
@@ -814,6 +817,7 @@ class threaded_p:
                     c2=c00
                     c2.Placement=App.Placement(App.Vector(B,0,A),App.Rotation(App.Vector(0,1,0),270))
                     c1=c1.cut(c2)
+                    
             elif st=='90RSL':
                 xi=dia.find('x')
                 key_1=dia[:xi]
@@ -898,6 +902,7 @@ class threaded_p:
                     c2=c00
                     c2.Placement=App.Placement(App.Vector(B,0,A),App.Rotation(App.Vector(0,1,0),270))
                     c1=c1.fuse(c2)
+                   
         elif key=='02':
             key_1=dia
             sa1=ThreadStl_data.screws[key_1]
@@ -1007,7 +1012,8 @@ class threaded_p:
                     c2=c00
                     c2.Placement=App.Placement(App.Vector(p5),App.Rotation(App.Vector(0,1,0),180+2*s0))
                     c1=c1.cut(c2)
-                c1=c1.cut(c22)
+                #c1=c1.cut(c22)
+                    return
             elif st=='45SB' or st=='90SB':
                 c2 = Part.makeCylinder(A1,a,Base.Vector(0,0,0),Base.Vector(0,0,1))
                 c2 = Part.makeCylinder(A1,a,Base.Vector(0,0,0),Base.Vector(0,0,1))
@@ -1054,7 +1060,8 @@ class threaded_p:
                     c2=c00
                     c2.Placement=App.Placement(App.Vector(p5),App.Rotation(App.Vector(0,1,0),180+2*s0))
                     c1=c1.fuse(c2)
-                c1=c1.cut(c23)
+                #c1=c1.cut(c23)
+                    return
         elif key=='04':
             key_1=dia[:3]
             key_2=dia[-3:]
@@ -1225,6 +1232,7 @@ class threaded_p:
                     c2.Placement=App.Placement(App.Vector(p4),App.Rotation(App.Vector(0,1,0),-135))
                     c1=c1.cut(c2)
                     c1=c1.cut(c21)
+                    
             elif st=='90RY':
                 x=B*math.cos(math.pi/4)
                 y=B*math.sin(math.pi/4)
@@ -1336,6 +1344,7 @@ class threaded_p:
                     c1=c1.cut(c2)
                 c1=c1.cut(c21)
                 c1=c1.cut(c22)
+                    
         elif key=='03' or key=='05':
             key_1=dia[:3]
             key_2=dia[-3:]
@@ -1399,6 +1408,7 @@ class threaded_p:
                         c21.Placement=App.Placement(App.Vector(0,-A,0),App.Rotation(App.Vector(1,0,0),270))
                         c2=c2.fuse(c21)
                     c1=c1.cut(c2)
+                    
             elif st=='RT'or st=='RCr':
                 if st=='RT':
                     sa=ThreadStl_data.tees_d[dia]
@@ -1475,6 +1485,7 @@ class threaded_p:
                         c21=c00
                         c21.Placement=App.Placement(App.Vector(0,-B,0),App.Rotation(App.Vector(1,0,0),270))
                         c1=c1.cut(c21)
+                    
         elif key=='06':
             key_1=dia[:3]
             key_2=dia[-3:]
@@ -1572,6 +1583,7 @@ class threaded_p:
                     c21.Placement=App.Placement(App.Vector(H+E2,0,0),App.Rotation(App.Vector(0,1,0),270))
                     c2=c2.fuse(c21)
                     c1=c1.fuse(c21)
+                    
             elif st=='Hose_nipple':
                 sa1=ThreadStl_data.screws[key_1]
                 LL1=sa1[8]
@@ -1638,6 +1650,7 @@ class threaded_p:
                     c21=c00
                     c21.Placement=App.Placement(App.Vector(L,0,0),App.Rotation(App.Vector(0,1,0),270))
                     c1=c1.fuse(c21)
+                    
             elif st=='Piece_nipple' or st=='Both_nipple':
                 sa=ThreadStl_data.screws[key_1]
                 a=sa[6]
@@ -1663,6 +1676,7 @@ class threaded_p:
                         c21.Placement=App.Placement(App.Vector(0,0,0),App.Rotation(App.Vector(0,1,0),90))
                         c1=c1.fuse(c21)
                     c1=c1.cut(c20)
+                        
                 elif st=='Both_nipple':
                     c1 = Part.makeCylinder(d2,L-2*L1,Base.Vector(L1,0,0),Base.Vector(1,0,0))
                     c20 = Part.makeCylinder(d0,L+2*L1,Base.Vector(0,0,0),Base.Vector(1,0,0))
@@ -1685,6 +1699,7 @@ class threaded_p:
                         c21.Placement=App.Placement(App.Vector(L,0,0),App.Rotation(App.Vector(0,1,0),270))
                         c1=c1.fuse(c21)
                     c1=c1.cut(c20)
+                       
         elif key=='07':
             global w10
             key_1=dia
@@ -1797,6 +1812,7 @@ class threaded_p:
                 c1=c1.cut(c2)
                 c2 = Part.makeCylinder(d1,b1*2-2*l,Base.Vector(l,0,0),Base.Vector(1,0,0))
                 c1=c1.cut(c2)
+                
         elif key=='08':
             if st=='Socket_parrallel':
                 key_1=dia
@@ -1812,8 +1828,9 @@ class threaded_p:
                     c2.Placement=App.Placement(App.Vector(0,0,0),App.Rotation(App.Vector(0,1,0),90))
                     c1=c1.cut(c2)
                 else:
-                   c2 = Part.makeCylinder(D0,L,Base.Vector(0,0,0),Base.Vector(1,0,0))
-                   c1=c1.cut(c2)
+                   #c2 = Part.makeCylinder(D0,L,Base.Vector(0,0,0),Base.Vector(1,0,0))
+                   #c1=c1.cut(c2)
+                   return
             elif st=='Socket_taper':
                 key_1=dia
                 sa=ThreadStl_data.screws[key_1]
@@ -1848,6 +1865,7 @@ class threaded_p:
                     c2=c00
                     c2.Placement=App.Placement(App.Vector(L,0,0),App.Rotation(App.Vector(0,1,0),270))
                     c1=c1.cut(c2)
+                    
             elif st=='Socket_difference':
                 key_1=dia[:3]
                 key_2=dia[-3:]
@@ -1915,6 +1933,7 @@ class threaded_p:
                     c2=c00
                     c2.Placement=App.Placement(App.Vector(La,0,0),App.Rotation(App.Vector(0,1,0),270))
                     c1=c1.cut(c2)
+                    
         if key=='09' :
             key_1=dia
             sa=ThreadStl_data.tubes[key_1]
@@ -1968,10 +1987,11 @@ class threaded_p:
                 c2.Placement=App.Placement(App.Vector(0,l,0),App.Rotation(App.Vector(1,0,0),90))
                 c1=c1.cut(c2)
             else:
-                cutter_011(self)
-                c2=c00
-                c2.Placement=App.Placement(App.Vector(0,0,0),App.Rotation(App.Vector(1,0,0),270))
-                c1=c1.cut(c2)
+                #cutter_011(self)
+                #c2=c00
+                #c2.Placement=App.Placement(App.Vector(0,0,0),App.Rotation(App.Vector(1,0,0),270))
+                #c1=c1.cut(c2)
+                return
         if key=='10' :
             key_1=dia
             sa=ThreadStl_data.screws[key_1]
@@ -2000,6 +2020,7 @@ class threaded_p:
                 c2=c00
                 c2.Placement=App.Placement(App.Vector(l+b,0,0),App.Rotation(App.Vector(0,1,0),270))
                 c1=c1.fuse(c2)
+                
             if float(key_1[:2])>=25:
                 c2 = Part.makeCylinder(0.8*B/2,1.3*b,Base.Vector(0.3*b,0,0),Base.Vector(1,0,0))
                 c3 = Part.makeCylinder(0.8*d0,L-1.3*b,Base.Vector(1.3*b,0,0),Base.Vector(1,0,0))
@@ -2060,6 +2081,7 @@ class threaded_p:
                 c1=c1.cut(c2)
             c2 = Part.makeCylinder(d01,L-L2,Base.Vector(L2,0,0),Base.Vector(1,0,0))
             c1=c1.cut(c2)
+                
         elif key=='12':
             key_1=dia[:3]
             key_2=dia[-3:]
@@ -2326,6 +2348,7 @@ class threaded_p:
                 c2=c00
                 c2.Placement=App.Placement(App.Vector(L,0,0),App.Rotation(App.Vector(0,1,0),270))
                 c1=c1.cut(c2)
+                
         elif key=='13':
             key_1=dia[:3]
             key_2=dia[-3:]
@@ -2609,6 +2632,7 @@ class threaded_p:
                 c2=c00
                 c2.Placement=App.Placement(App.Vector(L,0,0),App.Rotation(App.Vector(0,1,0),270))
                 c1=c1.cut(c2)
+                
         elif key=='14':
             key_1=dia[:3]
             key_2=dia[-3:]
@@ -2770,6 +2794,7 @@ class threaded_p:
                 c2=c00
                 c2.Placement=App.Placement(App.Vector(L,0,0),App.Rotation(App.Vector(0,1,0),270))
                 c1=c1.cut(c2)
+                
         elif key=='15':
             key_1=dia[:3]
             sa=ThreadStl_data.screws[key_1]
@@ -2803,8 +2828,10 @@ class threaded_p:
             L=App.ActiveDocument.getObject(label).L
             L=float(L) 
             d0=d2-t
-            c1 = Part.makeCylinder(d2,L-2*L1,Base.Vector(L1,0,0),Base.Vector(1,0,0))
-            c20 = Part.makeCylinder(d0,L,Base.Vector(L1,0,0),Base.Vector(1,0,0))
+            c1 = Part.makeCylinder(d2,L-2*L1,Base.Vector(0,0,0),Base.Vector(1,0,0))
+            #Part.show(c1)
+            c20 = Part.makeCylinder(d0,L,Base.Vector(0,0,0),Base.Vector(1,0,0))
+            #Part.show(c20)
             if Thread==True:
                 male_thread2(self)
                 c2=c00
@@ -2817,18 +2844,9 @@ class threaded_p:
                 c2 = Part.makeCylinder(d0,L+L1,Base.Vector(-L1/2,0,0),Base.Vector(1,0,0))
                 c1=c1.cut(c2)
             else:
-                cutter_01a(self)
-                c21=c00
-                c21.Placement=App.Placement(App.Vector(0,0,0),App.Rotation(App.Vector(0,1,0),90))
-                c1=c1.fuse(c21)
-                cutter_01a(self)
-                c21=c00
-                c21.Placement=App.Placement(App.Vector(L,0,0),App.Rotation(App.Vector(0,1,0),270))
-                c1=c1.fuse(c21)
-            c1=c1.cut(c20)  
-        #doc=App.ActiveDocument
-        #Gui.Selection.addSelection(doc.Name,obj.Name)
-        #Gui.runCommand('Draft_Move',0)         
+                c1 = Part.makeCylinder(d2,L,Base.Vector(0,0,0),Base.Vector(1,0,0))
+                c1=c1.cut(c20)  
+                
         obj.Shape=c1        
 
 
