@@ -1,17 +1,13 @@
 # -*- coding: utf-8 -*-
 import os
 import sys
+import csv
 from PySide import QtGui
 from PySide import QtUiTools
 from PySide import QtCore
 from FreeCAD import Base
 import FreeCADGui as Gui
-import FreeCAD, Part, math
-import DraftVecUtils
-import Sketcher
-import PartDesign
-from math import pi
-import Draft
+import math
 import FreeCAD as App
 from pipe_data import ParamWeldStlPipe
 from pipe_data import WeldStl_data
@@ -27,7 +23,7 @@ Pipe_type=['Welded joint','Threaded fitting','PVC fittings','Circular duct fitti
 class Ui_Dialog(object):#05
     def setupUi(self, Dialog):
         Dialog.setObjectName("Dialog")
-        Dialog.resize(300, 340)
+        Dialog.resize(300, 450)
         Dialog.move(1000, 0)
         #種別　type
         self.label_typ= QtGui.QLabel('種別(Type)',Dialog)
@@ -75,17 +71,17 @@ class Ui_Dialog(object):#05
         self.label_5 = QtGui.QLabel('Pipe',Dialog)
         self.label_5.setGeometry(QtCore.QRect(100, 145, 61, 16))
         self.spinBoxL=QtGui.QSpinBox(Dialog)
-        self.spinBoxL.setGeometry(130, 145, 60, 32)
+        self.spinBoxL.setGeometry(125, 145, 80, 32)
         self.spinBoxL.setMinimum(10)  # 最小値
-        self.spinBoxL.setMaximum(5500)  # 最大値
+        self.spinBoxL.setMaximum(50000)  # 最大値
         self.spinBoxL.setValue(5500)  # 
         self.spinBoxL.setSingleStep(10) #step
         self.spinBoxL.setAlignment(QtCore.Qt.AlignCenter)
         #ステップ
         self.label_step = QtGui.QLabel('Step',Dialog)
-        self.label_step.setGeometry(QtCore.QRect(200, 145, 50, 16))
+        self.label_step.setGeometry(QtCore.QRect(220, 145, 50, 16))
         self.le_step = QtGui.QLineEdit('10',Dialog)
-        self.le_step.setGeometry(QtCore.QRect(200, 160, 50, 16))
+        self.le_step.setGeometry(QtCore.QRect(220, 160, 50, 16))
         self.le_step.setAlignment(QtCore.Qt.AlignCenter)
         #チェックボックス
         self.checkbox = QtGui.QCheckBox('Thread',Dialog)
@@ -107,6 +103,35 @@ class Ui_Dialog(object):#05
         self.label_img.setText("")
         self.label_img.setAlignment(QtCore.Qt.AlignCenter)
         self.label_img.setObjectName("label_img")
+
+        #質量計算
+        self.pushButton_m = QtGui.QPushButton('massCulculation',Dialog)
+        self.pushButton_m.setGeometry(QtCore.QRect(20, 350, 100, 23))
+        self.pushButton_m.setObjectName("pushButton")  
+        #質量集計
+        self.pushButton_m20 = QtGui.QPushButton('massTally_csv',Dialog)
+        self.pushButton_m20.setGeometry(QtCore.QRect(120, 325, 150, 23))
+        #self.pushButton_m2.setObjectName("pushButton")
+
+        self.pushButton_m2 = QtGui.QPushButton('massTally_spreadsheet',Dialog)
+        self.pushButton_m2.setGeometry(QtCore.QRect(120, 350, 150, 23))
+        #self.pushButton_m2.setObjectName("pushButton")
+        #質量入力
+        self.pushButton_m3 = QtGui.QPushButton('massImput[kg]',Dialog)
+        self.pushButton_m3.setGeometry(QtCore.QRect(20, 375, 100, 23))
+        self.pushButton_m3.setObjectName("pushButton")  
+        self.le_mass = QtGui.QLineEdit(Dialog)
+        self.le_mass.setGeometry(QtCore.QRect(120, 375, 50, 20))
+        self.le_mass.setAlignment(QtCore.Qt.AlignCenter)  
+        self.le_mass.setText('10.0')
+        #密度
+        self.lbl_gr = QtGui.QLabel('SpecificGravity',Dialog)
+        self.lbl_gr.setGeometry(QtCore.QRect(20, 400, 80, 12))
+        self.le_gr = QtGui.QLineEdit(Dialog)
+        self.le_gr.setGeometry(QtCore.QRect(120, 400, 50, 20))
+        self.le_gr.setAlignment(QtCore.Qt.AlignCenter)  
+        self.le_gr.setText('7.85')
+
         self.retranslateUi(Dialog)
         self.comboBox_typ.addItems(Pipe_type)
         self.comboBox_lst.addItems(WeldStl_data.lst)
@@ -129,9 +154,120 @@ class Ui_Dialog(object):#05
         QtCore.QObject.connect(self.pushButton, QtCore.SIGNAL("pressed()"), self.f_create)
         QtCore.QObject.connect(self.pushButton_1, QtCore.SIGNAL("pressed()"), self.update)
         QtCore.QObject.connect(self.pushButton_2, QtCore.SIGNAL("pressed()"), self.read_data)
+        
+        QtCore.QObject.connect(self.pushButton_m, QtCore.SIGNAL("pressed()"), self.massCulc)
+        QtCore.QObject.connect(self.pushButton_m20, QtCore.SIGNAL("pressed()"), self.massTally2)
+        QtCore.QObject.connect(self.pushButton_m2, QtCore.SIGNAL("pressed()"), self.massTally)
+        QtCore.QObject.connect(self.pushButton_m3, QtCore.SIGNAL("pressed()"), self.massImput)
+        
+        
         QtCore.QMetaObject.connectSlotsByName(Dialog)
+
     def retranslateUi(self, Dialog):
         Dialog.setWindowTitle(QtGui.QApplication.translate("Dialog", "PipeFittings", None))
+    
+    def massImput(self):
+         # 選択したオブジェクトを取得する
+        c00 = Gui.Selection.getSelection()
+        if c00:
+            obj = c00[0]
+        label='mass[kg]'
+        g=float(self.le_mass.text())
+        try:
+            obj.addProperty("App::PropertyFloat", "mass",label)
+            obj.mass=g
+        except:
+            obj.mass=g
+
+    def massCulc(self):
+        # 選択したオブジェクトを取得する
+        c00 = Gui.Selection.getSelection()
+        if c00:
+            obj = c00[0]
+        label='mass[kg]'
+        g0=float(self.le_gr.text())
+        try:
+            g=round(obj.Shape.Volume*g0*1000/10**9 ,2)
+        except:
+             pass
+        try:
+            obj.addProperty("App::PropertyFloat", "mass",label)
+            obj.mass=g
+        except:
+            obj.mass=g        
+    
+    def massTally2(self):#csv
+        doc = App.ActiveDocument
+        objects = doc.Objects
+        mass_list = []
+        for obj in objects:
+            if Gui.ActiveDocument.getObject(obj.Name).Visibility:
+                if obj.isDerivedFrom("Part::Feature"):
+                    if hasattr(obj, "mass"):
+                        try:
+                            if obj.Label[:6]=='Single' or obj.Label[:4]=='Both' or obj.Label[:8]=='Straight':
+                                mass_list.append([obj.Label, obj.dia,obj.standard,obj.L,'mm', obj.mass])
+                            else:
+                                mass_list.append([obj.Label, obj.dia,obj.standard,'1','Piece', obj.mass])
+                        except:
+                            pass    
+                else:
+                     pass
+        doc_path = doc.FileName
+        csv_filename = os.path.splitext(os.path.basename(doc_path))[0] + "_parts_list.csv"
+        csv_path = os.path.join(os.path.dirname(doc_path), csv_filename)
+        with open(csv_path, 'w', newline='') as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow(['Name','Dia','Standard','Quantity','Unit', "Mass[kg]"])
+            writer.writerows(mass_list) 
+    
+    def massTally(self):
+        doc = App.ActiveDocument
+        # 新しいスプレッドシートを作成
+        spreadsheet = doc.addObject("Spreadsheet::Sheet", "PartList")
+        spreadsheet.Label = "Parts List"
+        
+        # ヘッダー行を記入
+        headers = ["No",  "Name", "Dia", "Standard",'Quantity','Unit','Mass[kg]']
+        for header in enumerate(headers):
+            #spreadsheet.set(f"A{i+1}", str(i + 1))  # 行番号
+            spreadsheet.set(f"A{1}", headers[0])
+            spreadsheet.set(f"B{1}", headers[1])
+            spreadsheet.set(f"C{1}", headers[2])
+            spreadsheet.set(f"D{1}", headers[3])
+            spreadsheet.set(f"E{1}", headers[4])
+            spreadsheet.set(f"F{1}", headers[5])
+            spreadsheet.set(f"G{1}", headers[6])
+        # パーツを列挙して情報を書き込む
+        row = 2
+        i=1
+        for i,obj in enumerate(doc.Objects):
+            if hasattr(obj, "Shape") and obj.Shape.Volume > 0:
+                try:
+                    spreadsheet.set(f"A{row}", str(row-1))  # No
+                    spreadsheet.set(f"B{row}", obj.Label)  
+                    spreadsheet.set(f"C{row}", obj.dia)
+                    spreadsheet.set(f"D{row}", obj.standard) 
+                    try:
+                        spreadsheet.set(f"E{row}", obj.L)   # quantity
+                        spreadsheet.set(f"F{row}", 'mm')
+                    except:   
+                        spreadsheet.set(f"E{row}", '1')   # quantity
+                        spreadsheet.set(f"F{row}", 'piece') 
+                    try:
+                        spreadsheet.set(f"G{row}", f"{obj.mass:.2f}")  # mass
+                    except:
+                        pass
+                    #material = obj.material if "material" in obj.PropertiesList else ""
+                    row += 1
+                except:
+                    pass    
+        
+        App.ActiveDocument.recompute()
+        Gui.activeDocument().activeView().viewAxometric()
+    
+    
+    
     def read_data(self):
         selection = Gui.Selection.getSelection()
         for obj in selection:
@@ -171,6 +307,7 @@ class Ui_Dialog(object):#05
         selection = Gui.Selection.getSelection()
         for obj in selection:
             myShape=obj
+            #print(myShape.Name)
             dia=self.comboBox_dia.currentText()
             myShape.dia=dia
             st=self.comboBox_standard.currentText()
@@ -180,10 +317,11 @@ class Ui_Dialog(object):#05
                 pass
             material=self.comboBox_material.currentText()
             myShape.material=str(material)
+            
             try:
                 if myShape.Name=='Single_flange_straight_pipe' or myShape.Name=='Both_flanges_straight_pipe':
                      if self.comboBox_material.currentIndex()==0:
-                         if st[:3]=='SGP':
+                         if material[:3]=='SGP':
                             myShape.standard=st[:3]
                             if st[-7:]=='JIS7.5k':
                                 dia=WeldStl_data.flg_75[:15]
@@ -213,18 +351,226 @@ class Ui_Dialog(object):#05
                             dia=WeldStl_data.flg_d[:15]
                         myShape.standard=st[:6] 
                         myShape.standard2=st[7:]
+                     try:
+                        L0=self.spinBoxL.value()
+                        myShape.L=str(L0)
+                     except:
+                        myShape=None
+                elif myShape.Name[:6]=='Flange':
+                    
+                    if st=='JIS2k':
+                        sa=WeldStl_data.JIS2k[dia]
+                    elif st=='JIS5k':
+                        #print(st)
+                        if self.comboBox_typ.currentText()=='Welded joint':
+                            sa=WeldStl_data.JIS5k[dia] 
+                        elif self.comboBox_typ.currentText()=='Threaded fitting':
+                            #print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+                            sa=ThreadStl_data.JIS5k[dia] 
+                            
+                    elif st=='JIS7.5k':
+                        sa=WeldStl_data.JIS75k[dia]  
+                    elif st=='JIS10k':
+                        if self.comboBox_typ.currentText()=='Welded joint':
+                            sa=WeldStl_data.JIS10k[dia]
+                        elif self.comboBox_typ.currentText()=='Threaded fitting':
+                            sa=ThreadStl_data.JIS10k[dia] 
+                    elif st=='JIS16k':
+                        sa=WeldStl_data.JIS16k[dia]
+                    elif st=='JIS20k':
+                        sa=WeldStl_data.JIS20k[dia]  
+                    t=sa[4]
+                    #print(t)
+                    myShape.t=str(t)
+                elif myShape.Name[:4]=='Elbo':
+                    sa=WeldStl_data.elbo[dia]
+                    if st[:8]=='045_Long':
+                        B=round(sa[1]*math.tan(22.5/57.3),1)
+                        myShape.B=str(B)
+                    elif st[:8]=='090_Long' or st[:8]=='090_Large':
+                        A=round(sa[1]*math.tan(45),1)  
+                        myShape.A=str(A) 
+                    elif st[:8]=='180_Long':
+                        P=round(sa[1]*2,1)
+                        myShape.P=str(P) 
+                    elif st[:8]=='045_Short':
+                        B=round(sa[1]*math.tan(22.5/57.3),1)   
+                        myShape.B=str(B) 
+                    elif st[:8]=='090_Short':
+                        A=round(sa[1]*math.tan(45),1)  
+                        myShape.A=str(A)
+                    elif st[:8]=='180_Short':
+                        P=round(sa[1]*2,1) 
+                        myShape.P=str(P) 
 
-                               
-                try:
-                   L0=self.spinBoxL.value()
-                   myShape.L=str(L0)
-                except:
-                   myShape=None
+                    elif st=='45L':
+                        sa=ThreadStl_data.elbows[obj.dia]
+                        A45=sa[1]
+                        myShape.A45=str(A45)  
+                    elif st=='90L':
+                        sa=ThreadStl_data.elbows[obj.dia]
+                        A=sa[0]
+                        B=sa[1]
+                        myShape.A=str(A)     
+                        myShape.B=str(B)  
+                    elif st=='90SL' :
+                        sa=ThreadStl_data.elbows_sl[obj.dia]
+                        A=sa[0]
+                        B=sa[1] 
+                        myShape.A=str(A)     
+                        myShape.B=str(B)  
+                    elif st=='90RL' :    
+                        sa=ThreadStl_data.elbows_rl[obj.dia]
+                        A=sa[0]
+                        B=sa[1]      
+                        myShape.A=str(A)     
+                        myShape.B=str(B)  
+                    elif st=='90RSL' :
+                        sa=ThreadStl_data.elbows_rsl[obj.dia]
+                        A=sa[0]
+                        B=sa[1]  
+                        myShape.A=str(A)     
+                        myShape.B=str(B) 
+                elif myShape.Name[:3]=='Tee':
+                    if self.comboBox_typ=='Welded joint':
+                        sa=WeldStl_data.tees[dia]   
+                        C=sa[2]  
+                        M=sa[3]
+                        myShape.C=str(C)    
+                        myShape.M=str(M) 
+                    elif self.comboBox_typ=='Theaded fitting':
+                        if st=='T':
+                            sa=ThreadStl_data.tees_e[obj.dia]
+                            A=sa[0]
+                            myShape.A=str(A) 
+                        elif st=='RT':
+                            sa=ThreadStl_data.tees_d[obj.dia]
+                            A=sa[0]
+                            B=sa[1]  
+                            myShape.A=str(A) 
+                            myShape.B=str(B)   
+                elif myShape.Name=='Y':
+                    if st=='45Y':
+                        sa=ThreadStl_data.Ys_d[obj.dia]
+                        A=sa[0]
+                        B=sa[1]
+                        myShape.A=str(A) 
+                        myShape.B=str(B)  
+                    elif st=='90Y':
+                        sa=ThreadStl_data.Ys_d[obj.dia]
+                        A=sa[2]
+                        B=sa[3] 
+                        myShape.A=str(A) 
+                        myShape.B=str(B)    
+                elif myShape.Name=='Cross': 
+                    st=self.comboBox_standard.currentText()   
+                    if st=='Cr':
+                        sa=ThreadStl_data.cross_e[obj.dia]
+                        A=sa[0]
+                        myShape.A=str(A) 
+                    elif st=='RCr':
+                        sa=ThreadStl_data.cross_d[obj.dia]
+                        A=sa[0]
+                        B=sa[1]
+                        myShape.A=str(A) 
+                        myShape.B=str(B) 
+
+                elif myShape.Name=='Bend':    
+                    if st[:2]=='45':
+                       sa=ThreadStl_data.bends_d[obj.dia]
+                       A=sa[0]  
+                       myShape.A=str(A)   
+                    elif st[:2]=='90':
+                       sa=ThreadStl_data.bends_d[obj.dia]
+                       A=sa[2]
+                       myShape.A=str(A) 
+                elif myShape.Name=='Nipple':    
+                    sa=ThreadStl_data.nipples_d[obj.dia]
+                    L=sa[0]
+                    E1=sa[1]
+                    E2=sa[2] 
+                    myShape.L=str(L)  
+                    myShape.E1=str(E1)  
+                    myShape.E2=str(E2)         
+
+                elif myShape.Name[:7]=='Reducer':
+                    sa=WeldStl_data.reducs[dia]    
+                    H=sa[2]
+                    myShape.H=str(H) 
+                elif myShape.Name[:9]=='Rap_joint':
+                    sa=WeldStl_data.raps[obj.dia] 
+                    F=sa[4]
+                    myShape.F=str(F)
+                elif myShape.Name[:19]=='Gate_Valve_internal' or myShape.Name[:19]=='Gate_Valve_external':
+                    if self.comboBox_typ.currentText()=='Welded joint':
+                        st=self.comboBox_standard.currentText() 
+                        if self.comboBox_material.currentIndex()==0:
+                            obj.standard=WeldStl_data.exp_carbon
+                            i=self.comboBox_standard.currentIndex()
+                            obj.standard=WeldStl_data.exp_carbon[i]
+                            sa=WeldStl_data.gates_10k_cast[obj.dia] 
+                        elif self.comboBox_material.currentIndex()==1:
+                            obj.standard=WeldStl_data.exp_carbon
+                            i=self.comboBox_standard.currentIndex()
+                            obj.standard=WeldStl_data.exp_carbon[i]  
+                            sa=WeldStl_data.gates_10k_SUS[obj.dia]
+                            
+                        L=sa[0]
+                        if myShape.Name[:19]=='Gate_Valve_internal':
+                            H=sa[1]
+                        elif myShape.Name[:19]=='Gate_Valve_external':
+                            H=sa[2]  
+                        myShape.H=str(H)  
+                        myShape.L=str(L) 
+                    else:
+                        return  
+                elif myShape.Name[:10]=='Gate_Valve': 
+                    st=self.comboBox_standard.currentText() 
+                    if st=='JIS10k':
+                        sa= ThreadStl_data.gates_10k[obj.dia]
+                    elif st=='JIS5k':
+                        sa= ThreadStl_data.gates_5k[obj.dia]
+                    L=sa[1]
+                    myShape.L=str(L) 
+                elif myShape.Name[:11]=='Check_Valve':
+                    st=self.comboBox_standard.currentText()
+                    if self.comboBox_typ.currentText()=='Welded joint':
+                        if st=='JIS10k': 
+                            sa=WeldStl_data.checks_10k_cast[dia] 
+                        elif st=='JIS7.5k':    
+                            sa=WeldStl_data.checks_75k_cast[dia] 
+                    elif self.comboBox_typ.currentText()=='Threaded fitting':
+                        if st=='JIS10k':
+                            sa= ThreadStl_data.checks_10k[obj.dia]
+                    L=sa[1]
+                    myShape.L=str(L)  
+                elif myShape.Name[:9]=='Expansion':
+                    st=self.comboBox_standard.currentText() 
+                    if st=='20mm':
+                        sa=WeldStl_data.exp_20mm[obj.dia]
+                    elif st=='50mm':
+                        sa=WeldStl_data.exp_50mm[obj.dia] 
+                    elif st=='100mm':
+                        sa=WeldStl_data.exp_100mm[obj.dia]  
+                    elif st=='200mm':
+                        sa=WeldStl_data.exp_200mm[obj.dia]    
+                    L=sa[2] 
+                    myShape.L=str(L)   
+
+                elif myShape.Name[:4]=='Flex':
+                    sa=WeldStl_data.exp_50mm[dia]   
+                    L=sa[7]
+                    myShape.L=str(L)  
+                elif myShape.Name[:4]=='Straight_Pipe':
+                    if self.comboBox_typ=='Theaded fitting':
+                        L=self.spinBoxL.value()
+                        myShape.L=L
+
+
+                App.ActiveDocument.recompute(None,True,True) 
             except:
                 return                
-        
-        App.ActiveDocument.recompute() 
-           
+            App.ActiveDocument.recompute() 
 
     def on_lst3(self):#材質
         self.comboBox_standard.clear()
@@ -236,6 +582,7 @@ class Ui_Dialog(object):#05
                 ta=WeldStl_data.Tube_carbon
             elif material=='Stainless steel':
                 ta=WeldStl_data.Tube_stainless
+                
             self.comboBox_standard.clear()
             try:
                 self.comboBox_standard.addItems(ta)  
@@ -377,15 +724,9 @@ class Ui_Dialog(object):#05
             if key=='00' or key=='09':#---------------------------------------------------------
                 material=self.comboBox_material.currentText()
                 if material=='Carbon steel':
-                    if key=='00':
-                        ta=WeldStl_data.flg_carbon
-                    elif key=='09':
-                        ta=WeldStl_data.s_flg_carbon    
+                    ta=WeldStl_data.flg_carbon
                 elif material=='Stainless steel':
-                    if key=='00':
-                        ta=WeldStl_data.flg_stainless
-                    elif key=='09':
-                        ta=WeldStl_data.s_flg_stainless
+                    ta=WeldStl_data.s_flg_stainless
 
             elif key=='01':
                 material=self.comboBox_material.currentText()
@@ -420,7 +761,6 @@ class Ui_Dialog(object):#05
                     ta=WeldStl_data.Tube_stainless
 
             elif key=='06' or key=='07':
-                
                 material=self.comboBox_material.currentText()
                 if material=='Carbon steel':
                     ta=WeldStl_data.s_flg_carbon
@@ -433,11 +773,10 @@ class Ui_Dialog(object):#05
                 elif material=='Stainless steel':
                     ta=WeldStl_data.Tube_stainless
             elif key=='10' :
-                material=self.comboBox_material.currentText()
                 ta=WeldStl_data.rap
             elif key=='11' or key=='12' :
                 material=self.comboBox_material.currentText()
-                ta=WeldStl_data.rap[1:2]
+                ta=WeldStl_data.exp_carbon
             elif key=='13' :
                 material=self.comboBox_material.currentText()
                 ta=WeldStl_data.check
@@ -589,6 +928,7 @@ class Ui_Dialog(object):#05
 
                     elif st[4:9]=='Large':
                         dia=WeldStl_data.flg_d[18:23]
+
                 elif material=='Stainless steel':
                     if st[4:8]=='Long':
                         dia=WeldStl_data.flg_d[1:15]
@@ -612,6 +952,7 @@ class Ui_Dialog(object):#05
                         dia=WeldStl_data.tee [:59]
                     else:
                         dia=WeldStl_data.tee
+
             elif key=='03' or key=='04':
                 material=self.comboBox_material.currentText()
                 st=self.comboBox_standard.currentText()
@@ -641,7 +982,6 @@ class Ui_Dialog(object):#05
                 dia=WeldStl_data.tube_d
             elif key=='06' or key=='07':
                 st=self.comboBox_standard.currentText()
-                
                 if st[:3]=='SGP':
                     if st[-7:]=='JIS7.5k' :
                         dia=WeldStl_data.flg_75[:15]
@@ -818,7 +1158,7 @@ class Ui_Dialog(object):#05
                     FC="径違いチーズ"
                 elif st=='Cr':
                     pic='img_' + st + '.png'
-                    dia=ThreadStl_data.tube_d [1:]
+                    dia=ThreadStl_data.tube_d [3:]
                     FC="同径クロス"
                 elif st=='RCr':
                     pic='img_' + st + '.png'
@@ -831,11 +1171,11 @@ class Ui_Dialog(object):#05
                     FC="同径ニップル"
                 elif st=='Piece_nipple':
                     pic='img_' + st + '.png'
-                    dia=ThreadStl_data.tube_d
+                    dia=ThreadStl_data.tube_d[1:]
                     FC="片長ニップル"
                 elif st=='Both_nipple':
                     pic='img_' + st + '.png'
-                    dia=ThreadStl_data.tube_d
+                    dia=ThreadStl_data.tube_d[1:]
                     FC="両長ニップル"
                 elif st=='Reducing_nipple' :
                     pic='img_' + st + '.png'
@@ -1154,17 +1494,24 @@ class Ui_Dialog(object):#05
             pass
         
     def f_create(self):
+        global key
+        #global sa
         typ=self.comboBox_typ.currentText()
         key = self.comboBox_lst.currentText()[:2]
 
         if typ=='Welded joint':
-            if key=='00' :
-                label = 'Flange'
+            if key=='00' or key=='09' :
+                if key=='00':
+                    label = 'Flange'
+                elif key=='09':
+                    label='Flange_Lid'    
+
                 obj = App.ActiveDocument.addObject("Part::FeaturePython",label)
                 obj.addProperty("App::PropertyEnumeration", "dia",label)
                 obj.dia=dia                
                 i=self.comboBox_dia.currentIndex()
                 obj.dia=dia[i]
+
                 obj.addProperty("App::PropertyEnumeration", "standard",label)
                 if self.comboBox_material.currentIndex()==0:
                     obj.standard=WeldStl_data.flg_carbon
@@ -1174,7 +1521,23 @@ class Ui_Dialog(object):#05
                     obj.standard=WeldStl_data.flg_stainless
                     i=self.comboBox_standard.currentIndex()
                     obj.standard=WeldStl_data.flg_stainless[i]  
-                  
+
+                st=self.comboBox_standard.currentText()
+                if st=='JIS2k':
+                    sa=WeldStl_data.JIS2k[obj.dia]
+                elif st=='JIS5k':
+                    sa=WeldStl_data.JIS5k[obj.dia] 
+                elif st=='JIS7.5k':
+                    sa=WeldStl_data.JIS75k[obj.dia]  
+                elif st=='JIS10k':
+                    sa=WeldStl_data.JIS10k[obj.dia]
+                elif st=='JIS16k':
+                    sa=WeldStl_data.JIS16k[obj.dia]
+                elif st=='JIS20k':
+                    sa=WeldStl_data.JIS20k[obj.dia]  
+                t=sa[4]
+                obj.addProperty("App::PropertyString", "t",label).t=str(t)
+                
             elif key=='01':
                 label = 'Elbow'
                 obj = App.ActiveDocument.addObject("Part::FeaturePython",label)
@@ -1190,8 +1553,30 @@ class Ui_Dialog(object):#05
                 elif self.comboBox_material.currentIndex()==1:
                     obj.standard=WeldStl_data.Elbow_stainless
                     i=self.comboBox_standard.currentIndex()
-                    obj.standard=WeldStl_data.Elbow_stainless[i]  
-            
+                    obj.standard=WeldStl_data.Elbow_stainless[i] 
+
+                st=self.comboBox_standard.currentText()   
+                sa=WeldStl_data.elbo[obj.dia]
+
+                if st[:8]=='045_Long':
+                    B=round(sa[1]*math.tan(22.5/57.3),1)
+                    obj.addProperty("App::PropertyString", "B",label).B=str(B)
+                elif st[:8]=='090_Long' or st[:8]=='090_Large':
+                    A=round(sa[1]*math.tan(45),1)  
+                    obj.addProperty("App::PropertyString", "A",label).A=str(A)  
+                elif st[:8]=='180_Long':
+                    P=round(sa[1]*2,1)
+                    obj.addProperty("App::PropertyString", "P",label).P=str(P)  
+                if st[:8]=='045_Short':
+                    B=round(sa[1]*math.tan(22.5/57.3),1)
+                    obj.addProperty("App::PropertyString", "B",label).B=str(B)
+                elif st[:8]=='090_Short':
+                    A=round(sa[1]*math.tan(45),1)  
+                    obj.addProperty("App::PropertyString", "A",label).A=str(A)  
+                elif st[:8]=='180_Short':
+                    P=round(sa[1]*2,1)
+                    obj.addProperty("App::PropertyString", "P",label).P=str(P)    
+                App.activeDocument().recompute(None,True,True)
             elif key=='02':
                 label = 'Tee'
                 obj = App.ActiveDocument.addObject("Part::FeaturePython",label)
@@ -1208,7 +1593,14 @@ class Ui_Dialog(object):#05
                     obj.standard=WeldStl_data.Tee_stainless
                     i=self.comboBox_standard.currentIndex()
                     obj.standard=WeldStl_data.Tee_stainless[i]  
-            
+
+                st=self.comboBox_standard.currentText()   
+                sa=WeldStl_data.tees[obj.dia] 
+                C=sa[2]
+                M=sa[3]
+                obj.addProperty("App::PropertyString", "C",label).C=str(C)  
+                obj.addProperty("App::PropertyString", "M",label).M=str(M) 
+
             elif key=='03':
                 label = 'Reducer_concentric'
                 obj = App.ActiveDocument.addObject("Part::FeaturePython",label)
@@ -1225,6 +1617,11 @@ class Ui_Dialog(object):#05
                     obj.standard=WeldStl_data.reduc_stainless
                     i=self.comboBox_standard.currentIndex()
                     obj.standard=WeldStl_data.reduc_stainless[i]  
+                st=self.comboBox_standard.currentText()   
+                sa=WeldStl_data.tees[obj.dia] 
+                H=sa[2]
+                obj.addProperty("App::PropertyString", "H",label).H=str(H) 
+
             elif key=='04':
                 label = 'Reducer_eccentric'
                 obj = App.ActiveDocument.addObject("Part::FeaturePython",label)
@@ -1240,7 +1637,12 @@ class Ui_Dialog(object):#05
                 elif self.comboBox_material.currentIndex()==1:
                     obj.standard=WeldStl_data.reduc_stainless
                     i=self.comboBox_standard.currentIndex()
-                    obj.standard=WeldStl_data.reduc_stainless[i]          
+                    obj.standard=WeldStl_data.reduc_stainless[i]  
+
+                st=self.comboBox_standard.currentText()   
+                sa=WeldStl_data.tees[obj.dia] 
+                H=sa[2]
+                obj.addProperty("App::PropertyString", "H",label).H=str(H)             
 
             elif key=='05' :
                 label = 'Straight_tube'
@@ -1274,6 +1676,7 @@ class Ui_Dialog(object):#05
                 obj.dia=dia[i]
                 obj.addProperty("App::PropertyEnumeration", "standard",label)
                 if self.comboBox_material.currentIndex()==0:
+                    st=self.comboBox_standard.currentText() 
                     obj.standard=WeldStl_data.Tube_carbon
                     i=self.comboBox_standard.currentIndex()
                     if st[:3]=='SGP':
@@ -1317,24 +1720,6 @@ class Ui_Dialog(object):#05
                     i=self.comboBox_standard.currentIndex()
                     obj.standard=WeldStl_data.Tube_stainless[i]  
             
-            elif key=='09':
-                label = 'Flange_lid'
-                obj = App.ActiveDocument.addObject("Part::FeaturePython",label)
-                obj.addProperty("App::PropertyEnumeration", "dia",label)
-                obj.dia=dia                
-                i=self.comboBox_dia.currentIndex()
-                obj.dia=dia[i]
-                
-                obj.addProperty("App::PropertyEnumeration", "standard",label)
-                if self.comboBox_material.currentIndex()==0:
-                    obj.standard=WeldStl_data.flg_carbon
-                    i=self.comboBox_standard.currentIndex()
-                    obj.standard=WeldStl_data.flg_carbon[i]
-                elif self.comboBox_material.currentIndex()==1:
-                    obj.standard=WeldStl_data.flg_stainless
-                    i=self.comboBox_standard.currentIndex()
-                    obj.standard=WeldStl_data.flg_stainless[i]      
-
             elif key=='10' :#ラップジョイント
                 label = 'Rap_joint'
                 obj = App.ActiveDocument.addObject("Part::FeaturePython",label)
@@ -1351,8 +1736,13 @@ class Ui_Dialog(object):#05
                 elif self.comboBox_material.currentIndex()==1:
                     obj.standard=WeldStl_data.flg_stainless
                     i=self.comboBox_standard.currentIndex()
-                    obj.standard=WeldStl_data.flg_stainless[i]      
+                    obj.standard=WeldStl_data.flg_stainless[i]   
 
+                st=self.comboBox_standard.currentText()   
+                sa=WeldStl_data.raps[obj.dia] 
+                F=sa[4]
+                obj.addProperty("App::PropertyString", "F",label).F=str(F) 
+                obj.standard=st
             elif key=='11' or key=='12':
                 if key=='11':
                     label = 'Gate_Valve_internal'
@@ -1370,10 +1760,26 @@ class Ui_Dialog(object):#05
                     obj.standard=WeldStl_data.flg_carbon
                     i=self.comboBox_standard.currentIndex()
                     obj.standard=WeldStl_data.flg_carbon[i]
+                    sa=WeldStl_data.gates_10k_cast[obj.dia] 
                 elif self.comboBox_material.currentIndex()==1:
                     obj.standard=WeldStl_data.flg_stainless
                     i=self.comboBox_standard.currentIndex()
-                    obj.standard=WeldStl_data.flg_stainless[i]      
+                    obj.standard=WeldStl_data.flg_stainless[i]  
+                    sa=WeldStl_data.gates_10k_SUS[obj.dia] 
+
+                st=self.comboBox_standard.currentText()   
+                L=sa[0]
+                if key=='11':
+                    H=sa[1]
+                elif key=='12':
+                    H=sa[2]    
+
+                obj.addProperty("App::PropertyString", "H",label).H=str(H) 
+                obj.addProperty("App::PropertyString", "L",label).L=str(L) 
+                st=self.comboBox_standard.currentText()
+                obj.standard=st 
+
+
 
             elif key=='13':
                 label = 'Check_Valve_swing_type'    
@@ -1384,14 +1790,16 @@ class Ui_Dialog(object):#05
                 obj.dia=dia[i]
                 
                 obj.addProperty("App::PropertyEnumeration", "standard",label)
-                if self.comboBox_material.currentIndex()==0:
-                    obj.standard=WeldStl_data.check
-                    i=self.comboBox_standard.currentIndex()
-                    obj.standard=WeldStl_data.check[i]
-                elif self.comboBox_material.currentIndex()==1:
-                    obj.standard=WeldStl_data.check
-                    i=self.comboBox_standard.currentIndex()
-                    obj.standard=WeldStl_data.check[i]      
+                obj.standard=WeldStl_data.check
+                i=self.comboBox_standard.currentIndex()
+                obj.standard=WeldStl_data.check[i]
+                st=self.comboBox_standard.currentText() 
+                if st=='JIS10k':
+                    sa= WeldStl_data.checks_10k_cast[obj.dia]
+                elif st=='JIS7.5k':
+                    sa= WeldStl_data.checks_75k_cast[obj.dia]    
+                L=sa[1]
+                obj.addProperty("App::PropertyString", "L",label).L=str(L) 
 
             elif key=='14'or key=='16':
                 i=self.comboBox_dia.currentIndex()
@@ -1402,9 +1810,7 @@ class Ui_Dialog(object):#05
                 obj = App.ActiveDocument.addObject("Part::FeaturePython",label)
                 obj.addProperty("App::PropertyEnumeration", "dia",label)
                 obj.dia=dia                
-                
                 obj.dia=dia[i]
-                
                 obj.addProperty("App::PropertyEnumeration", "standard",label)
                 if self.comboBox_material.currentIndex()==0:
                     obj.standard=WeldStl_data.exp_st
@@ -1414,6 +1820,23 @@ class Ui_Dialog(object):#05
                     obj.standard=WeldStl_data.exp_st
                     i=self.comboBox_standard.currentIndex()
                     obj.standard=WeldStl_data.exp_st[i] 
+                
+                st=self.comboBox_standard.currentText() 
+                if st=='20mm':
+                    sa=WeldStl_data.exp_20mm[obj.dia]
+                elif st=='50mm':
+                    sa=WeldStl_data.exp_50mm[obj.dia] 
+                elif st=='100mm':
+                    sa=WeldStl_data.exp_100mm[obj.dia]  
+                elif st=='200mm':
+                    sa=WeldStl_data.exp_200mm[obj.dia]    
+                L=sa[2]
+                obj.addProperty("App::PropertyString", "L",label).L=str(L)  
+                obj.standard=st
+
+
+
+
             elif key=='15':
                 label = 'Flex_joint_10k'    
                 obj = App.ActiveDocument.addObject("Part::FeaturePython",label)
@@ -1431,7 +1854,15 @@ class Ui_Dialog(object):#05
                 elif self.comboBox_material.currentIndex()==1:
                     obj.standard=WeldStl_data.rap
                     i=self.comboBox_standard.currentIndex()
-                    obj.standard=WeldStl_data.rap[i]         
+                    obj.standard=WeldStl_data.rap[i]  
+
+                st=self.comboBox_standard.currentText() 
+                sa=WeldStl_data.exp_50mm[obj.dia] 
+                L=sa[7]
+                obj.addProperty("App::PropertyString", "L",label).L=str(L)  
+                obj.standard=st     
+
+
 
             obj.addProperty("App::PropertyEnumeration", "material",label)
             obj.material=WeldStl_data.mate[:2]
@@ -1458,6 +1889,13 @@ class Ui_Dialog(object):#05
                     obj.standard=ThreadStl_data.flg[i]
                 elif self.comboBox_material.currentIndex()==1:
                     return
+                st=self.comboBox_standard.currentText()
+                if st=='JIS5k':
+                    sa=ThreadStl_data.JIS5k[obj.dia] 
+                elif st=='JIS10k':
+                    sa=ThreadStl_data.JIS10k[obj.dia]
+                t=sa[4]
+                obj.addProperty("App::PropertyString", "t",label).t=str(t)
 
             elif key=='01' :
                 label = 'Elbow'
@@ -1476,6 +1914,35 @@ class Ui_Dialog(object):#05
                     i=self.comboBox_standard.currentIndex()
                     obj.standard=ThreadStl_data.elbow_st[i]  
 
+                st=self.comboBox_standard.currentText()   
+                if st=='45L':
+                    sa=ThreadStl_data.elbows[obj.dia]
+                    A45=sa[1]
+                    obj.addProperty("App::PropertyString", "A45",label).A45=str(A45)
+                elif st=='90L' :
+                    sa=ThreadStl_data.elbows[obj.dia]
+                    A=sa[0]
+                    obj.addProperty("App::PropertyString", "A",label).A=str(A)  
+                elif st=='90SL' :
+                    sa=ThreadStl_data.elbows_sl[obj.dia]
+                    A=sa[0]
+                    B=sa[1]
+                    obj.addProperty("App::PropertyString", "A",label).A=str(A)      
+                    obj.addProperty("App::PropertyString", "B",label).B=str(B)   
+                elif st=='90RL' :
+                    sa=ThreadStl_data.elbows_rl[obj.dia]
+                    A=sa[0]
+                    B=sa[1]
+                    obj.addProperty("App::PropertyString", "A",label).A=str(A)      
+                    obj.addProperty("App::PropertyString", "B",label).B=str(B)    
+                elif st=='90RSL' :
+                    sa=ThreadStl_data.elbows_rsl[obj.dia]
+                    A=sa[0]
+                    B=sa[1]
+                    obj.addProperty("App::PropertyString", "A",label).A=str(A)      
+                    obj.addProperty("App::PropertyString", "B",label).B=str(B)          
+                
+
             elif key=='02' :
                 label = 'Bend'
                 obj = App.ActiveDocument.addObject("Part::FeaturePython",label)
@@ -1492,6 +1959,18 @@ class Ui_Dialog(object):#05
                     obj.standard=ThreadStl_data.bend_st
                     i=self.comboBox_standard.currentIndex()
                     obj.standard=ThreadStl_data.bend_st[i] 
+
+                st=self.comboBox_standard.currentText()   
+                if st[:2]=='45':
+                    sa=ThreadStl_data.bends_d[obj.dia]
+                    A=sa[0]
+                    obj.addProperty("App::PropertyString", "A",label).A=str(A)
+                elif st[:2]=='90':
+                    sa=ThreadStl_data.bends_d[obj.dia]
+                    A=sa[2]
+                    obj.addProperty("App::PropertyString", "A",label).A=str(A)    
+
+
 
             elif key=='03' :
                 label = 'Tee'
@@ -1510,6 +1989,17 @@ class Ui_Dialog(object):#05
                     i=self.comboBox_standard.currentIndex()
                     obj.standard=ThreadStl_data.tee_st[i] 
 
+                st=self.comboBox_standard.currentText()   
+                if st=='T':
+                    sa=ThreadStl_data.tees_e[obj.dia]
+                    A=sa[0]
+                    obj.addProperty("App::PropertyString", "A",label).A=str(A)
+                elif st=='RT':
+                    sa=ThreadStl_data.tees_d[obj.dia]
+                    A=sa[0]
+                    B=sa[1]
+                    obj.addProperty("App::PropertyString", "A",label).A=str(A)  
+                    obj.addProperty("App::PropertyString", "B",label).B=str(B)   
             elif key=='04' :
                 label = 'Y'
                 obj = App.ActiveDocument.addObject("Part::FeaturePython",label)
@@ -1526,6 +2016,20 @@ class Ui_Dialog(object):#05
                     obj.standard=ThreadStl_data.Y_st
                     i=self.comboBox_standard.currentIndex()
                     obj.standard=ThreadStl_data.Y_st[i] 
+
+                st=self.comboBox_standard.currentText()   
+                if st=='45Y':
+                    sa=ThreadStl_data.Ys_d[obj.dia]
+                    A=sa[0]
+                    B=sa[1]
+                    obj.addProperty("App::PropertyString", "A",label).A=str(A)
+                    obj.addProperty("App::PropertyString", "B",label).B=str(B)
+                elif st=='90Y':
+                    sa=ThreadStl_data.Ys_d[obj.dia]
+                    A=sa[2]
+                    B=sa[3]
+                    obj.addProperty("App::PropertyString", "A",label).A=str(A)
+                    obj.addProperty("App::PropertyString", "B",label).B=str(B)    
 
             elif key=='05' :
                 label = 'Cross'
@@ -1544,9 +2048,20 @@ class Ui_Dialog(object):#05
                     i=self.comboBox_standard.currentIndex()
                     obj.standard=ThreadStl_data.cross_st[i]  
 
+                st=self.comboBox_standard.currentText()   
+                if st=='Cr':
+                    sa=ThreadStl_data.cross_e[obj.dia]
+                    A=sa[0]
+                    obj.addProperty("App::PropertyString", "A",label).A=str(A)
+                elif st=='RCr':
+                    sa=ThreadStl_data.cross_d[obj.dia]
+                    A=sa[0]
+                    B=sa[1]
+                    obj.addProperty("App::PropertyString", "A",label).A=str(A)    
+                    obj.addProperty("App::PropertyString", "B",label).B=str(B)   
+
             elif key=='06' :
                 label = 'Nipple'
-                L=self.spinBoxL.value()
                 obj = App.ActiveDocument.addObject("Part::FeaturePython",label)
                 obj.addProperty("App::PropertyEnumeration", "dia",label)
                 obj.dia=dia                
@@ -1561,7 +2076,37 @@ class Ui_Dialog(object):#05
                     obj.standard=ThreadStl_data.nipple_st
                     i=self.comboBox_standard.currentIndex()
                     obj.standard=ThreadStl_data.nipple_st[i]  
-                obj.addProperty("App::PropertyString", "L",label).L=str(L)    
+
+                st=self.comboBox_standard.currentText()  
+                if st=='Nipple':
+                    sa=ThreadStl_data.nipples[obj.dia]
+                    L=sa[0]
+                    E=sa[1]
+                    obj.addProperty("App::PropertyString", "L",label).L=str(L)
+                    obj.addProperty("App::PropertyString", "E",label).E=str(E)
+                elif st=='Reducing_nipple':
+                    sa=ThreadStl_data.nipples_d[obj.dia]
+                    L=sa[0]
+                    E1=sa[1]
+                    E2=sa[2]
+                    obj.addProperty("App::PropertyString", "L",label).L=str(L)    
+                    obj.addProperty("App::PropertyString", "E1",label).E1=str(E1)  
+                    obj.addProperty("App::PropertyString", "E2",label).E2=str(E2)
+                elif st=='Hose_nipple':
+                    sa=ThreadStl_data.nipples_h[obj.dia]
+                    L=sa[0]
+                    E1=sa[1]
+                    E2=sa[2]
+                    obj.addProperty("App::PropertyString", "L",label).L=str(L)    
+                    obj.addProperty("App::PropertyString", "E1",label).E1=str(E1)  
+                    obj.addProperty("App::PropertyString", "E2",label).E2=str(E2) 
+                elif st=='Piece_nipple' or st=='Both_nipple':
+                    #L=self.spinBoxL.value() 
+                    sa=ThreadStl_data.nipples_p[obj.dia]
+                    L=sa[0]
+                    obj.addProperty("App::PropertyString", "L",label).L=str(L)   
+
+                
                 
             elif key=='07' :
                 label = 'Union'
@@ -1665,6 +2210,8 @@ class Ui_Dialog(object):#05
                     i=self.comboBox_standard.currentIndex()
                     obj.standard=ThreadStl_data.globe_st[i] 
 
+
+
             elif key=='13' :
                 label = 'Gate_Valve'
                 obj = App.ActiveDocument.addObject("Part::FeaturePython",label)
@@ -1682,8 +2229,16 @@ class Ui_Dialog(object):#05
                     i=self.comboBox_standard.currentIndex()
                     obj.standard=ThreadStl_data.gate_st[i] 
 
+                st=self.comboBox_standard.currentText() 
+                if st=='JIS10k':
+                    sa= ThreadStl_data.globes_10k[obj.dia]
+                elif st=='JIS5k':
+                    sa= ThreadStl_data.globes_5k[obj.dia]
+                L=sa[1]
+                obj.addProperty("App::PropertyString", "L",label).L=str(L)     
+
             elif key=='14' :
-                label = 'Gate_Valve'
+                label = 'Check_Valve'
                 obj = App.ActiveDocument.addObject("Part::FeaturePython",label)
                 obj.addProperty("App::PropertyEnumeration", "dia",label)
                 obj.dia=dia                
@@ -1698,6 +2253,14 @@ class Ui_Dialog(object):#05
                     obj.standard=ThreadStl_data.check_st
                     i=self.comboBox_standard.currentIndex()
                     obj.standard=ThreadStl_data.check_st[i] 
+
+                st=self.comboBox_standard.currentText() 
+                if st=='JIS10k':
+                    sa= ThreadStl_data.checks_10k[obj.dia]
+                L=sa[1]
+                obj.addProperty("App::PropertyString", "L",label).L=str(L)     
+
+
 
             elif key=='15' :
                 label = 'Straight_Pipe'
