@@ -250,7 +250,7 @@ class Ui_Dialog(object):#05
         spreadsheet.Label = "Parts List"
         
         # ヘッダー行を記入
-        headers = ["No",  "Name", "Dia", "Standard",'Quantity','Unit','Mass[kg]']
+        headers = ["No",  "Name", "Dia", "Standard",'Count','Unit[kg]','Mass[kg]']
         for header in enumerate(headers):
             #spreadsheet.set(f"A{i+1}", str(i + 1))  # 行番号
             spreadsheet.set(f"A{1}", headers[0])
