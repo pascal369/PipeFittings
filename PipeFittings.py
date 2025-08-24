@@ -19,7 +19,7 @@ from pipe_data import Duct_data
 from pipe_data import ParamDuct
 
 DEBUG = True # set to True to show debug messages
-lang=['English','Jananeese']
+lang=['English','Japanese']
 Pipe_type=['Welded joint','Threaded fitting','PVC fittings','Circular duct fitting']
 class Ui_Dialog(object):#05
     def setupUi(self, Dialog):
@@ -166,9 +166,9 @@ class Ui_Dialog(object):#05
         QtCore.QObject.connect(self.pushButton, QtCore.SIGNAL("pressed()"), self.f_create)
         QtCore.QObject.connect(self.pushButton_1, QtCore.SIGNAL("pressed()"), self.update)
         QtCore.QObject.connect(self.pushButton_2, QtCore.SIGNAL("pressed()"), self.read_data)
+        QtCore.QObject.connect(self.pushButton_2, QtCore.SIGNAL("pressed()"), self.update)       
         QtCore.QObject.connect(self.pushButton_ct, QtCore.SIGNAL("pressed()"), self.countCulc)
         QtCore.QObject.connect(self.pushButton_m, QtCore.SIGNAL("pressed()"), self.massCulc)
-        #QtCore.QObject.connect(self.pushButton_m20, QtCore.SIGNAL("pressed()"), self.massTally2)
         QtCore.QObject.connect(self.pushButton_m2, QtCore.SIGNAL("pressed()"), self.massTally)
         QtCore.QObject.connect(self.pushButton_m3, QtCore.SIGNAL("pressed()"), self.massImput)
         
@@ -217,38 +217,13 @@ class Ui_Dialog(object):#05
             obj.mass=g
         except:
             obj.mass=g        
-    
-    #def massTally2(self):#parts list csv
-    #    doc = App.ActiveDocument
-    #    objects = doc.Objects
-    #    mass_list = []
-    #    for obj in objects:
-    #        if Gui.ActiveDocument.getObject(obj.Name).Visibility:
-    #            if obj.isDerivedFrom("Part::Feature"):
-    #                if hasattr(obj, "mass"):
-    #                    try:
-    #                        if obj.Label[:6]=='Single' or obj.Label[:4]=='Both' or obj.Label[:8]=='Straight':
-    #                            mass_list.append([obj.Label, obj.dia,obj.standard,obj.L,'mm', obj.mass])
-    #                        else:
-    #                            mass_list.append([obj.Label, obj.dia,obj.standard,'1','Piece', obj.mass])
-    #                    except:
-    #                        pass    
-    #            else:
-    #                 pass
-    #    doc_path = doc.FileName
-    #    csv_filename = os.path.splitext(os.path.basename(doc_path))[0] + "_parts_list.csv"
-    #    csv_path = os.path.join(os.path.dirname(doc_path), csv_filename)
-    #    with open(csv_path, 'w', newline='') as csvfile:
-    #        writer = csv.writer(csvfile)
-    #        writer.writerow(['Name','Dia','Standard','Quantity','Unit', "Mass[kg]"])
-    #        writer.writerows(mass_list) 
-    
+
     def massTally(self):#parts list spreadsheet
         doc = App.ActiveDocument
-        # 新しいスプレッドシートを作成
-        spreadsheet = doc.addObject("Spreadsheet::Sheet", "PartList")
-        spreadsheet.Label = "Parts List"
-        
+        spreadsheet = doc.getObject("Parts_List") 
+        if spreadsheet is None:
+            spreadsheet = doc.addObject("Spreadsheet::Sheet", "Parts_List")
+            #return  
         # ヘッダー行を記入
         headers = ["No",  "Name", "Dia", "Standard",'Count','Unit[kg]','Mass[kg]']
         for header in enumerate(headers):
@@ -296,30 +271,33 @@ class Ui_Dialog(object):#05
                 spreadsheet.set(f'G{row}',str(s))
 
         App.ActiveDocument.recompute()
-        #Gui.activeDocument().activeView().viewAxometric()
     
     def read_data(self):
         selection = Gui.Selection.getSelection()
         for obj in selection:
-            myShape=obj
-            fittings=myShape.fittings
-            dia=myShape.dia
-            material=myShape.material
-            st=myShape.standard
+            try:
+                type=obj.type
+            except:
+                pass
+            fittings=obj.fittings
+            dia=obj.dia
+            material=obj.material
+            st=obj.standard
+            self.comboBox_typ.setCurrentText(type)
             self.comboBox_lst.setCurrentText(fittings)
             self.comboBox_standard.setCurrentText(st)
             self.comboBox_dia.setCurrentText(dia)
             self.comboBox_material.setCurrentText(material)
           
-            if myShape.Label=='Single_flange_straight_pipe' or myShape.Label=='Both_flanges_straight_pipe':
-                st=myShape.standard
-                st2=myShape.standard2
+            if obj.Label=='Single_flange_straight_pipe' or obj.Label=='Both_flanges_straight_pipe':
+                st=obj.standard
+                st2=obj.standard2
                 self.comboBox_standard.setCurrentText(st+'_'+st2)
             try:
-                L=int(myShape.L)
+                L=int(obj.L)
                 self.spinBoxL.setValue(int(L))
             except:
-                myShape=None
+                pass
     def spinMove(self):
         step=self.le_step.text()
         self.spinBoxL.setSingleStep(int(step)) 
@@ -336,18 +314,24 @@ class Ui_Dialog(object):#05
     def update(self):
         selection = Gui.Selection.getSelection()
         for obj in selection:
-            myShape=obj
-            #print(myShape.Name)
             dia=self.comboBox_dia.currentText()
-            myShape.dia=dia
+            obj.dia=dia
             st=self.comboBox_standard.currentText()
             try:
-                myShape.standard=st
+                obj.standard=st
             except:
                 pass
             material=self.comboBox_material.currentText()
-            myShape.material=str(material)
-            
+            obj.material=str(material)
+            label=self.comboBox_lst.currentText()[3:]
+            type=self.comboBox_typ.currentText()
+            try:
+                obj.addProperty("App::PropertyString", "type",label)
+                obj.type=type
+            except:
+                obj.type=type
+                print('error')
+                pass    
             try:
                 if myShape.Name=='Single_flange_straight_pipe' or myShape.Name=='Both_flanges_straight_pipe':
                      if self.comboBox_material.currentIndex()==0:
@@ -391,13 +375,10 @@ class Ui_Dialog(object):#05
                     if st=='JIS2k':
                         sa=WeldStl_data.JIS2k[dia]
                     elif st=='JIS5k':
-                        #print(st)
                         if self.comboBox_typ.currentText()=='Welded joint':
                             sa=WeldStl_data.JIS5k[dia] 
                         elif self.comboBox_typ.currentText()=='Threaded fitting':
-                            #print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
                             sa=ThreadStl_data.JIS5k[dia] 
-                            
                     elif st=='JIS7.5k':
                         sa=WeldStl_data.JIS75k[dia]  
                     elif st=='JIS10k':
@@ -410,7 +391,6 @@ class Ui_Dialog(object):#05
                     elif st=='JIS20k':
                         sa=WeldStl_data.JIS20k[dia]  
                     t=sa[4]
-                    #print(t)
                     myShape.t=str(t)
                 elif myShape.Name[:4]=='Elbo':
                     sa=WeldStl_data.elbo[dia]
@@ -595,11 +575,20 @@ class Ui_Dialog(object):#05
                     if self.comboBox_typ=='Theaded fitting':
                         L=self.spinBoxL.value()
                         myShape.L=L
-
-
                 App.ActiveDocument.recompute(None,True,True) 
             except:
-                return                
+                #myShape.dia=dia
+
+                pass
+
+            gengo=self.comboBox_lan.currentText()
+            label2=self.label_l.text()
+            label=self.comboBox_lst.currentText()[3:]
+            if gengo=='Japanese':
+                obj.Label=label2
+            else:
+                obj.Label=label 
+            print(gengo,label,label2)                  
             App.ActiveDocument.recompute() 
 
     def on_lst3(self):#材質
@@ -1444,6 +1433,11 @@ class Ui_Dialog(object):#05
                     elif st=='VD_C_5k' or st=='VD_C_10k':
                         pic='img_VD_C.png'
                         FC='ダンパー_フランジ式'
+
+                selection = Gui.Selection.getSelection()
+                for obj in selection:    
+                    self.comboBox_dia.setCurrentText(obj.dia)
+
             try:
                 base=os.path.dirname(os.path.abspath(__file__))
                 joined_path = os.path.join(base, "pipe_data",pic)
@@ -1528,21 +1522,29 @@ class Ui_Dialog(object):#05
         #global sa
         typ=self.comboBox_typ.currentText()
         key = self.comboBox_lst.currentText()[:2]
-
+        gengo=self.comboBox_lan.currentText()
         if typ=='Welded joint':
             if key=='00' or key=='09' :
                 if key=='00':
                     label = 'Flange'
                 elif key=='09':
                     label='Flange_Lid'    
-
+                label=self.comboBox_lst.currentText()[3:]
+                
+                #print(gengo,label,label2,label)  
                 obj = App.ActiveDocument.addObject("Part::FeaturePython",label)
                 obj.addProperty("App::PropertyEnumeration", "dia",label)
                 obj.dia=dia                
                 i=self.comboBox_dia.currentIndex()
                 obj.dia=dia[i]
-
                 obj.addProperty("App::PropertyEnumeration", "standard",label)
+
+                #label2=self.label_l.text()
+                #if gengo=='Japanese':
+                #    obj.Label=label2
+                #else:
+                #    obj.Label=label  
+
                 if self.comboBox_material.currentIndex()==0:
                     obj.standard=WeldStl_data.flg_carbon
                     i=self.comboBox_standard.currentIndex()
