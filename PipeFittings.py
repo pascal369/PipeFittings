@@ -107,17 +107,19 @@ class Ui_Dialog(object):#05
 
         #質量計算
         self.pushButton_m = QtGui.QPushButton('massCulculation',Dialog)
-        self.pushButton_m.setGeometry(QtCore.QRect(20, 350, 100, 23))
+        self.pushButton_m.setGeometry(QtCore.QRect(20, 350, 150, 23))
         self.pushButton_m.setObjectName("pushButton")  
 
         #spreadsheet
         #self.pushButton_m20 = QtGui.QPushButton('massTally_csv',Dialog)
         #self.pushButton_m20.setGeometry(QtCore.QRect(120, 325, 150, 23))
         self.pushButton_m2 = QtGui.QPushButton('massTally_spreadsheet',Dialog)
-        self.pushButton_m2.setGeometry(QtCore.QRect(20, 325, 188, 23))
+        self.pushButton_m2.setGeometry(QtCore.QRect(20, 325, 150, 23))
         #言語
         self.comboBox_lan = QtGui.QComboBox(Dialog)
-        self.comboBox_lan.setGeometry(QtCore.QRect(120, 350, 90, 22))
+        self.comboBox_lan.setGeometry(QtCore.QRect(180, 350, 100, 22))
+        self.pushButton_la=QtGui.QPushButton('language',Dialog)
+        self.pushButton_la.setGeometry(QtCore.QRect(180, 325, 100, 23))
         #count
         self.pushButton_ct = QtGui.QPushButton('Count',Dialog)
         self.pushButton_ct.setGeometry(QtCore.QRect(20, 375, 100, 23))
@@ -171,12 +173,50 @@ class Ui_Dialog(object):#05
         QtCore.QObject.connect(self.pushButton_m, QtCore.SIGNAL("pressed()"), self.massCulc)
         QtCore.QObject.connect(self.pushButton_m2, QtCore.SIGNAL("pressed()"), self.massTally)
         QtCore.QObject.connect(self.pushButton_m3, QtCore.SIGNAL("pressed()"), self.massImput)
-        
-        
+        QtCore.QObject.connect(self.pushButton_la, QtCore.SIGNAL("pressed()"), self.language)
+
         QtCore.QMetaObject.connectSlotsByName(Dialog)
 
     def retranslateUi(self, Dialog):
         Dialog.setWindowTitle(QtGui.QApplication.translate("Dialog", "PipeFittings", None))
+    
+    def language(self):
+        doc = App.activeDocument()
+        if doc:
+            group_names = []
+            for obj in doc.Objects:
+                #print('dddddddddddddddddddd')
+                print(obj.Label)
+                
+                try:
+                    type=obj.type
+                    self.comboBox_typ.setCurrentText(type)
+                except:
+                    pass
+                try:
+                    fittings=obj.fittings
+    
+                    dia=obj.dia
+                    material=obj.material
+                    st=obj.standard
+                    
+                    self.comboBox_lst.setCurrentText(fittings)
+                    self.comboBox_standard.setCurrentText(st)
+                    self.comboBox_dia.setCurrentText(dia)
+                    self.comboBox_material.setCurrentText(material)
+                    #selection = Gui.Selection.getSelection()
+                    #for obj in selection:
+
+                    gengo=self.comboBox_lan.currentText()
+                    label2=self.label_l.text()
+                    label=self.comboBox_lst.currentText()[3:]
+                    if gengo=='Japanese':
+                       obj.Label=label2
+                    else:
+                       obj.Label=label 
+                    print(gengo,label,label2)  
+                except:
+                    pass     
     
     def massImput(self):#質量入力
          # 選択したオブジェクトを取得する
@@ -277,13 +317,14 @@ class Ui_Dialog(object):#05
         for obj in selection:
             try:
                 type=obj.type
+                self.comboBox_typ.setCurrentText(type)
             except:
                 pass
             fittings=obj.fittings
             dia=obj.dia
             material=obj.material
             st=obj.standard
-            self.comboBox_typ.setCurrentText(type)
+            
             self.comboBox_lst.setCurrentText(fittings)
             self.comboBox_standard.setCurrentText(st)
             self.comboBox_dia.setCurrentText(dia)
@@ -313,14 +354,18 @@ class Ui_Dialog(object):#05
            App.ActiveDocument.recompute() 
     def update(self):
         selection = Gui.Selection.getSelection()
+        
         for obj in selection:
             dia=self.comboBox_dia.currentText()
             obj.dia=dia
             st=self.comboBox_standard.currentText()
+
+            
             try:
                 obj.standard=st
             except:
                 pass
+            
             material=self.comboBox_material.currentText()
             obj.material=str(material)
             label=self.comboBox_lst.currentText()[3:]
@@ -330,10 +375,11 @@ class Ui_Dialog(object):#05
                 obj.type=type
             except:
                 obj.type=type
-                print('error')
-                pass    
+                #print('error')
+                #pass 
+            myShape=obj
             try:
-                if myShape.Name=='Single_flange_straight_pipe' or myShape.Name=='Both_flanges_straight_pipe':
+                if myShape.Label=='Single_flange_straight_pipe' or myShape.Label=='Both_flanges_straight_pipe':
                      if self.comboBox_material.currentIndex()==0:
                          if material[:3]=='SGP':
                             myShape.standard=st[:3]
@@ -370,7 +416,7 @@ class Ui_Dialog(object):#05
                         myShape.L=str(L0)
                      except:
                         myShape=None
-                elif myShape.Name[:6]=='Flange':
+                elif myShape.Label[:6]=='Flange':
                     
                     if st=='JIS2k':
                         sa=WeldStl_data.JIS2k[dia]
@@ -392,25 +438,27 @@ class Ui_Dialog(object):#05
                         sa=WeldStl_data.JIS20k[dia]  
                     t=sa[4]
                     myShape.t=str(t)
-                elif myShape.Name[:4]=='Elbo':
+                elif myShape.Label[:4]=='Elbo':
+                    #print('cccccccccccccccccccccccccccccccccccccc')
                     sa=WeldStl_data.elbo[dia]
                     if st[:8]=='045_Long':
                         B=round(sa[1]*math.tan(22.5/57.3),1)
                         myShape.B=str(B)
+                        #print('aaaaaaaaaaaaaaaaaaaaaaaa')
                     elif st[:8]=='090_Long' or st[:8]=='090_Large':
-                        A=round(sa[1]*math.tan(45),1)  
+                        A=sa[1]
                         myShape.A=str(A) 
                     elif st[:8]=='180_Long':
                         P=round(sa[1]*2,1)
                         myShape.P=str(P) 
                     elif st[:8]=='045_Short':
-                        B=round(sa[1]*math.tan(22.5/57.3),1)   
+                        B=round(sa[2]*math.tan(22.5/57.3),1)   
                         myShape.B=str(B) 
                     elif st[:8]=='090_Short':
-                        A=round(sa[1]*math.tan(45),1)  
+                        A=sa[2]
                         myShape.A=str(A)
                     elif st[:8]=='180_Short':
-                        P=round(sa[1]*2,1) 
+                        P=round(sa[2]*2,1) 
                         myShape.P=str(P) 
 
                     elif st=='45L':
@@ -441,7 +489,7 @@ class Ui_Dialog(object):#05
                         B=sa[1]  
                         myShape.A=str(A)     
                         myShape.B=str(B) 
-                elif myShape.Name[:3]=='Tee':
+                elif myShape.Label[:3]=='Tee':
                     if self.comboBox_typ=='Welded joint':
                         sa=WeldStl_data.tees[dia]   
                         C=sa[2]  
@@ -459,7 +507,7 @@ class Ui_Dialog(object):#05
                             B=sa[1]  
                             myShape.A=str(A) 
                             myShape.B=str(B)   
-                elif myShape.Name=='Y':
+                elif myShape.Label=='Y':
                     if st=='45Y':
                         sa=ThreadStl_data.Ys_d[obj.dia]
                         A=sa[0]
@@ -472,7 +520,7 @@ class Ui_Dialog(object):#05
                         B=sa[3] 
                         myShape.A=str(A) 
                         myShape.B=str(B)    
-                elif myShape.Name=='Cross': 
+                elif myShape.Label=='Cross': 
                     st=self.comboBox_standard.currentText()   
                     if st=='Cr':
                         sa=ThreadStl_data.cross_e[obj.dia]
@@ -485,7 +533,7 @@ class Ui_Dialog(object):#05
                         myShape.A=str(A) 
                         myShape.B=str(B) 
 
-                elif myShape.Name=='Bend':    
+                elif myShape.Label=='Bend':    
                     if st[:2]=='45':
                        sa=ThreadStl_data.bends_d[obj.dia]
                        A=sa[0]  
@@ -494,7 +542,7 @@ class Ui_Dialog(object):#05
                        sa=ThreadStl_data.bends_d[obj.dia]
                        A=sa[2]
                        myShape.A=str(A) 
-                elif myShape.Name=='Nipple':    
+                elif myShape.Label=='Nipple':    
                     sa=ThreadStl_data.nipples_d[obj.dia]
                     L=sa[0]
                     E1=sa[1]
@@ -503,15 +551,19 @@ class Ui_Dialog(object):#05
                     myShape.E1=str(E1)  
                     myShape.E2=str(E2)         
 
-                elif myShape.Name[:7]=='Reducer':
+                elif myShape.Label[:7]=='Reducer':
                     sa=WeldStl_data.reducs[dia]    
                     H=sa[2]
                     myShape.H=str(H) 
-                elif myShape.Name[:9]=='Rap_joint':
+                elif myShape.Label[:3]=='Cap':
+                    sa=ThreadStl_data.caps_d[dia]    
+                    H=sa[1]
+                    myShape.H=str(H)     
+                elif myShape.Label[:9]=='Rap_joint':
                     sa=WeldStl_data.raps[obj.dia] 
                     F=sa[4]
                     myShape.F=str(F)
-                elif myShape.Name[:19]=='Gate_Valve_internal' or myShape.Name[:19]=='Gate_Valve_external':
+                elif myShape.Label[:19]=='Gate_Valve_internal' or myShape.Label[:19]=='Gate_Valve_external':
                     if self.comboBox_typ.currentText()=='Welded joint':
                         st=self.comboBox_standard.currentText() 
                         if self.comboBox_material.currentIndex()==0:
@@ -526,15 +578,15 @@ class Ui_Dialog(object):#05
                             sa=WeldStl_data.gates_10k_SUS[obj.dia]
                             
                         L=sa[0]
-                        if myShape.Name[:19]=='Gate_Valve_internal':
+                        if myShape.Label[:19]=='Gate_Valve_internal':
                             H=sa[1]
-                        elif myShape.Name[:19]=='Gate_Valve_external':
+                        elif myShape.Label[:19]=='Gate_Valve_external':
                             H=sa[2]  
                         myShape.H=str(H)  
                         myShape.L=str(L) 
                     else:
                         return  
-                elif myShape.Name[:10]=='Gate_Valve': 
+                elif myShape.Label[:10]=='Gate_Valve': 
                     st=self.comboBox_standard.currentText() 
                     if st=='JIS10k':
                         sa= ThreadStl_data.gates_10k[obj.dia]
@@ -542,7 +594,7 @@ class Ui_Dialog(object):#05
                         sa= ThreadStl_data.gates_5k[obj.dia]
                     L=sa[1]
                     myShape.L=str(L) 
-                elif myShape.Name[:11]=='Check_Valve':
+                elif myShape.Label[:11]=='Check_Valve':
                     st=self.comboBox_standard.currentText()
                     if self.comboBox_typ.currentText()=='Welded joint':
                         if st=='JIS10k': 
@@ -554,7 +606,7 @@ class Ui_Dialog(object):#05
                             sa= ThreadStl_data.checks_10k[obj.dia]
                     L=sa[1]
                     myShape.L=str(L)  
-                elif myShape.Name[:9]=='Expansion':
+                elif myShape.Label[:9]=='Expansion':
                     st=self.comboBox_standard.currentText() 
                     if st=='20mm':
                         sa=WeldStl_data.exp_20mm[obj.dia]
@@ -567,11 +619,11 @@ class Ui_Dialog(object):#05
                     L=sa[2] 
                     myShape.L=str(L)   
 
-                elif myShape.Name[:4]=='Flex':
+                elif myShape.Label[:4]=='Flex':
                     sa=WeldStl_data.exp_50mm[dia]   
                     L=sa[7]
                     myShape.L=str(L)  
-                elif myShape.Name[:4]=='Straight_Pipe':
+                elif myShape.Label[:4]=='Straight_Pipe':
                     if self.comboBox_typ=='Theaded fitting':
                         L=self.spinBoxL.value()
                         myShape.L=L
@@ -581,14 +633,7 @@ class Ui_Dialog(object):#05
 
                 pass
 
-            gengo=self.comboBox_lan.currentText()
-            label2=self.label_l.text()
-            label=self.comboBox_lst.currentText()[3:]
-            if gengo=='Japanese':
-                obj.Label=label2
-            else:
-                obj.Label=label 
-            print(gengo,label,label2)                  
+                           
             App.ActiveDocument.recompute() 
 
     def on_lst3(self):#材質
@@ -1520,10 +1565,10 @@ class Ui_Dialog(object):#05
     def f_create(self):
         global key
         #global sa
-        typ=self.comboBox_typ.currentText()
+        type=self.comboBox_typ.currentText()
         key = self.comboBox_lst.currentText()[:2]
         gengo=self.comboBox_lan.currentText()
-        if typ=='Welded joint':
+        if type=='Welded joint':
             if key=='00' or key=='09' :
                 if key=='00':
                     label = 'Flange'
@@ -1594,16 +1639,16 @@ class Ui_Dialog(object):#05
                     B=round(sa[1]*math.tan(22.5/57.3),1)
                     obj.addProperty("App::PropertyString", "B",label).B=str(B)
                 elif st[:8]=='090_Long' or st[:8]=='090_Large':
-                    A=round(sa[1]*math.tan(45),1)  
+                    A=sa[1]
                     obj.addProperty("App::PropertyString", "A",label).A=str(A)  
                 elif st[:8]=='180_Long':
                     P=round(sa[1]*2,1)
                     obj.addProperty("App::PropertyString", "P",label).P=str(P)  
                 if st[:8]=='045_Short':
-                    B=round(sa[1]*math.tan(22.5/57.3),1)
+                    B=round(sa[2]*math.tan(22.5/57.3),1)
                     obj.addProperty("App::PropertyString", "B",label).B=str(B)
                 elif st[:8]=='090_Short':
-                    A=round(sa[1]*math.tan(45),1)  
+                    A=sa[2]
                     obj.addProperty("App::PropertyString", "A",label).A=str(A)  
                 elif st[:8]=='180_Short':
                     P=round(sa[1]*2,1)
@@ -1906,7 +1951,7 @@ class Ui_Dialog(object):#05
             ParamWeldStlPipe.welded_p(obj) 
             obj.ViewObject.Proxy=0   
         
-        elif typ=='Threaded fitting':
+        elif type=='Threaded fitting':
             if key=='00' :
                 label = 'Flange'
                 obj = App.ActiveDocument.addObject("Part::FeaturePython",label)
@@ -2328,7 +2373,7 @@ class Ui_Dialog(object):#05
             ParamStlPScw.threaded_p(obj) 
             obj.ViewObject.Proxy= 0  
 
-        elif typ=='PVC fittings':
+        elif type=='PVC fittings':
             material=self.comboBox_material.currentText()
             if key=='00' :
                 label = 'Straight_Pipe'
@@ -2426,7 +2471,8 @@ class Ui_Dialog(object):#05
             obj.addProperty("App::PropertyString", "fittings",label).fittings=fittings
             ParamPvc.pvc_p(obj) 
             obj.ViewObject.Proxy= 0 
-        elif typ=='Circular duct fitting':
+            
+        elif type=='Circular duct fitting':
             material=self.comboBox_material.currentText()
             if key=='00' :
                 label = 'Straight_Pipe'
@@ -2563,7 +2609,7 @@ class Ui_Dialog(object):#05
             obj.addProperty("App::PropertyString", "fittings",label).fittings=fittings
             ParamDuct.duct_p(obj) 
             obj.ViewObject.Proxy= 0  
-
+        obj.addProperty("App::PropertyString", "type",label).type=type
         Gui.Selection.addSelection(obj)
         try:
             Gui.runCommand('Draft_Move',0)
