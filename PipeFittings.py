@@ -29,24 +29,32 @@ class Ui_Dialog(object):#05
         #種別　type
         self.label_typ= QtGui.QLabel('種別(Type)',Dialog)
         self.label_typ.setGeometry(QtCore.QRect(20, 0, 250, 22))
+        self.label_typ.setStyleSheet("color: black;")
         self.comboBox_typ = QtGui.QComboBox(Dialog)
         self.comboBox_typ.setGeometry(QtCore.QRect(110, 0, 180, 22))
 
         #管材   
-        self.label_lst= QtGui.QLabel('管材(Fittings)',Dialog)
-        self.label_lst.setGeometry(QtCore.QRect(20, 25, 120, 22))
-        self.label_lst.setObjectName("label_lst")
+        self.le_last= QtGui.QLabel('管材(Fittings)',Dialog)
+        self.le_last.setGeometry(QtCore.QRect(20, 25, 120, 22))
+        self.le_last.setObjectName("label_lst")
+        self.le_last.setStyleSheet("color: black;")
         self.comboBox_lst = QtGui.QComboBox(Dialog)
-        self.comboBox_lst.setGeometry(QtCore.QRect(110, 25, 180, 22))
+        self.comboBox_lst.setGeometry(QtCore.QRect(110, 28, 180, 22))
         self.comboBox_lst.setObjectName("comboBox_lst")
-        self.label_l= QtGui.QLabel(Dialog)
-        self.label_l.setGeometry(QtCore.QRect(130, 48, 120, 22))
+
+        #self.le_la= QtGui.QLabel(Dialog)
+        #self.le_la.setGeometry(QtCore.QRect(130, 48, 120, 22))
+
+        self.le_la = QtGui.QLineEdit(Dialog)
+        self.le_la.setGeometry(QtCore.QRect(110, 55, 180, 22))
+        self.le_la.setAlignment(QtCore.Qt.AlignLeft)  
         #材質
         self.label_material= QtGui.QLabel('材質(Material)',Dialog)
-        self.label_material.setGeometry(QtCore.QRect(20, 70, 120, 22))
+        self.label_material.setGeometry(QtCore.QRect(20, 80, 120, 20))
         self.label_material.setObjectName("label_material")
+        self.label_material.setStyleSheet("color: black;")
         self.comboBox_material = QtGui.QComboBox(Dialog)
-        self.comboBox_material.setGeometry(QtCore.QRect(110, 70, 180, 22))
+        self.comboBox_material.setGeometry(QtCore.QRect(110, 80, 180, 20))
         self.comboBox_material.setObjectName("comboBox_material")
         
         ta=WeldStl_data.mate[0:2]
@@ -55,24 +63,27 @@ class Ui_Dialog(object):#05
         
         #規格
         self.label_standard= QtGui.QLabel('規格(Standard)',Dialog)
-        self.label_standard.setGeometry(QtCore.QRect(20, 93, 120, 22))
+        self.label_standard.setGeometry(QtCore.QRect(20, 108, 120, 20))
         self.label_standard.setObjectName("label_standard")
+        self.label_standard.setStyleSheet("color: black;")
         self.comboBox_standard = QtGui.QComboBox(Dialog)
-        self.comboBox_standard.setGeometry(QtCore.QRect(110, 93, 180, 22))
+        self.comboBox_standard.setGeometry(QtCore.QRect(110, 108, 180, 20))
         self.comboBox_standard.setObjectName("comboBox_standard")
         #口径
         self.label_dia= QtGui.QLabel('口径(Diameter)',Dialog)
-        self.label_dia.setGeometry(QtCore.QRect(20, 116, 120, 22))
+        self.label_dia.setGeometry(QtCore.QRect(20, 136, 120, 20))
         self.label_dia.setObjectName("label_standard")
+        self.label_dia.setStyleSheet("color: black;")
         self.comboBox_dia = QtGui.QComboBox(Dialog)
-        self.comboBox_dia.setGeometry(QtCore.QRect(110, 116, 180, 20))
+        self.comboBox_dia.setGeometry(QtCore.QRect(110, 136, 180, 20))
         self.comboBox_dia.setObjectName("comboBox_dia")
 
         #切管
         self.label_5 = QtGui.QLabel('Pipe',Dialog)
-        self.label_5.setGeometry(QtCore.QRect(100, 145, 61, 16))
+        self.label_5.setGeometry(QtCore.QRect(100, 165, 61, 20))
+        self.label_5.setStyleSheet("color: black;")
         self.spinBoxL=QtGui.QSpinBox(Dialog)
-        self.spinBoxL.setGeometry(125, 145, 80, 32)
+        self.spinBoxL.setGeometry(125, 165, 80, 32)
         self.spinBoxL.setMinimum(10)  # 最小値
         self.spinBoxL.setMaximum(50000)  # 最大値
         self.spinBoxL.setValue(5500)  # 
@@ -80,49 +91,47 @@ class Ui_Dialog(object):#05
         self.spinBoxL.setAlignment(QtCore.Qt.AlignCenter)
         #ステップ
         self.label_step = QtGui.QLabel('Step',Dialog)
-        self.label_step.setGeometry(QtCore.QRect(220, 145, 50, 16))
+        self.label_step.setGeometry(QtCore.QRect(220, 160, 50, 20))
+        self.label_step.setStyleSheet("color: black;")
         self.le_step = QtGui.QLineEdit('10',Dialog)
-        self.le_step.setGeometry(QtCore.QRect(220, 160, 50, 16))
+        self.le_step.setGeometry(QtCore.QRect(220, 177, 50, 20))
         self.le_step.setAlignment(QtCore.Qt.AlignCenter)
         #チェックボックス
         self.checkbox = QtGui.QCheckBox('Thread',Dialog)
-        self.checkbox.setGeometry(QtCore.QRect(20, 142, 90, 23))
-        self.checkbox.setObjectName("checkbox")        
+        self.checkbox.setGeometry(QtCore.QRect(20, 162, 90, 20))
+        self.checkbox.setObjectName("checkbox") 
+        self.checkbox.setStyleSheet("color: black;")       
         #Create
         self.pushButton = QtGui.QPushButton('Create',Dialog)
-        self.pushButton.setGeometry(QtCore.QRect(100, 180, 80, 20))
+        self.pushButton.setGeometry(QtCore.QRect(102, 200, 50, 20))
         self.pushButton.setObjectName("pushButton")
         #upDate
         self.pushButton_1 = QtGui.QPushButton('upDate',Dialog)
-        self.pushButton_1.setGeometry(QtCore.QRect(180, 180, 80, 20))
+        self.pushButton_1.setGeometry(QtCore.QRect(195, 200, 50, 20))
         #import
         self.pushButton_2 = QtGui.QPushButton('import',Dialog)
-        self.pushButton_2.setGeometry(QtCore.QRect(20, 180, 80, 20))
+        self.pushButton_2.setGeometry(QtCore.QRect(10, 200, 50, 20))
         #img
         self.label_img = QtGui.QLabel(Dialog)
-        self.label_img.setGeometry(QtCore.QRect(20, 222, 250, 100))
+        self.label_img.setGeometry(QtCore.QRect(70, 222, 250, 100))
         self.label_img.setText("")
         self.label_img.setAlignment(QtCore.Qt.AlignTop)
         self.label_img.setObjectName("label_img")
 
         #質量計算
         self.pushButton_m = QtGui.QPushButton('massCulculation',Dialog)
-        self.pushButton_m.setGeometry(QtCore.QRect(20, 350, 150, 23))
+        self.pushButton_m.setGeometry(QtCore.QRect(20, 350, 150, 20))
         self.pushButton_m.setObjectName("pushButton")  
-
-        #spreadsheet
-        #self.pushButton_m20 = QtGui.QPushButton('massTally_csv',Dialog)
-        #self.pushButton_m20.setGeometry(QtCore.QRect(120, 325, 150, 23))
         self.pushButton_m2 = QtGui.QPushButton('massTally_spreadsheet',Dialog)
-        self.pushButton_m2.setGeometry(QtCore.QRect(20, 325, 150, 23))
+        self.pushButton_m2.setGeometry(QtCore.QRect(20, 325, 150, 20))
         #言語
         self.comboBox_lan = QtGui.QComboBox(Dialog)
-        self.comboBox_lan.setGeometry(QtCore.QRect(180, 350, 100, 22))
+        self.comboBox_lan.setGeometry(QtCore.QRect(175, 350, 100, 20))
         self.pushButton_la=QtGui.QPushButton('language',Dialog)
-        self.pushButton_la.setGeometry(QtCore.QRect(180, 325, 100, 23))
+        self.pushButton_la.setGeometry(QtCore.QRect(175, 325, 100, 20))
         #count
         self.pushButton_ct = QtGui.QPushButton('Count',Dialog)
-        self.pushButton_ct.setGeometry(QtCore.QRect(20, 375, 100, 23))
+        self.pushButton_ct.setGeometry(QtCore.QRect(20, 375, 95, 20))
         self.le_ct = QtGui.QLineEdit(Dialog)
         self.le_ct.setGeometry(QtCore.QRect(120, 375, 50, 20))
         self.le_ct.setAlignment(QtCore.Qt.AlignCenter)  
@@ -130,7 +139,7 @@ class Ui_Dialog(object):#05
 
         #質量入力
         self.pushButton_m3 = QtGui.QPushButton('massImput[kg]',Dialog)
-        self.pushButton_m3.setGeometry(QtCore.QRect(20, 400, 100, 23))
+        self.pushButton_m3.setGeometry(QtCore.QRect(20, 400, 95, 20))
         self.pushButton_m3.setObjectName("pushButton")  
         self.le_mass = QtGui.QLineEdit(Dialog)
         self.le_mass.setGeometry(QtCore.QRect(120, 400, 50, 20))
@@ -139,7 +148,8 @@ class Ui_Dialog(object):#05
 
         #密度
         self.lbl_gr = QtGui.QLabel('SpecificGravity',Dialog)
-        self.lbl_gr.setGeometry(QtCore.QRect(20, 425, 80, 12))
+        self.lbl_gr.setGeometry(QtCore.QRect(20, 425, 80, 20))
+        self.lbl_gr.setStyleSheet("color: black;")
         self.le_gr = QtGui.QLineEdit(Dialog)
         self.le_gr.setGeometry(QtCore.QRect(120, 425, 50, 20))
         self.le_gr.setAlignment(QtCore.Qt.AlignCenter)  
@@ -185,9 +195,6 @@ class Ui_Dialog(object):#05
         if doc:
             group_names = []
             for obj in doc.Objects:
-                #print('dddddddddddddddddddd')
-                print(obj.Label)
-                
                 try:
                     type=obj.type
                     self.comboBox_typ.setCurrentText(type)
@@ -195,7 +202,6 @@ class Ui_Dialog(object):#05
                     pass
                 try:
                     fittings=obj.fittings
-    
                     dia=obj.dia
                     material=obj.material
                     st=obj.standard
@@ -204,11 +210,9 @@ class Ui_Dialog(object):#05
                     self.comboBox_standard.setCurrentText(st)
                     self.comboBox_dia.setCurrentText(dia)
                     self.comboBox_material.setCurrentText(material)
-                    #selection = Gui.Selection.getSelection()
-                    #for obj in selection:
 
                     gengo=self.comboBox_lan.currentText()
-                    label2=self.label_l.text()
+                    label2=obj.JPN
                     label=self.comboBox_lst.currentText()[3:]
                     if gengo=='Japanese':
                        obj.Label=label2
@@ -285,7 +289,6 @@ class Ui_Dialog(object):#05
                     spreadsheet.set(f"A{row}", str(row-1))  # No
                     spreadsheet.set(f"B{row}", obj.Label)  
                     spreadsheet.set(f"C{row}", obj.dia)
-                    #spreadsheet.set(f"D{row}", obj.standard) 
                     try:
                         spreadsheet.set(f"A{row}", str(row-1))  # No
                         spreadsheet.set(f"B{row}", obj.Label)  
@@ -324,11 +327,12 @@ class Ui_Dialog(object):#05
             dia=obj.dia
             material=obj.material
             st=obj.standard
-            
+            JPN=obj.JPN
             self.comboBox_lst.setCurrentText(fittings)
             self.comboBox_standard.setCurrentText(st)
             self.comboBox_dia.setCurrentText(dia)
             self.comboBox_material.setCurrentText(material)
+            self.le_la.setText(JPN)
           
             if obj.Label=='Single_flange_straight_pipe' or obj.Label=='Both_flanges_straight_pipe':
                 st=obj.standard
@@ -359,13 +363,12 @@ class Ui_Dialog(object):#05
             dia=self.comboBox_dia.currentText()
             obj.dia=dia
             st=self.comboBox_standard.currentText()
-
-            
+            JPN=self.le_la.text()
             try:
                 obj.standard=st
             except:
                 pass
-            
+            obj.JPN=JPN
             material=self.comboBox_material.currentText()
             obj.material=str(material)
             label=self.comboBox_lst.currentText()[3:]
@@ -629,8 +632,6 @@ class Ui_Dialog(object):#05
                         myShape.L=L
                 App.ActiveDocument.recompute(None,True,True) 
             except:
-                #myShape.dia=dia
-
                 pass
 
                            
@@ -742,7 +743,7 @@ class Ui_Dialog(object):#05
         if  typ=='Welded joint':
             try:
                 b=WeldStl_data.l_lst[key]
-                self.label_l.setText(QtGui.QApplication.translate("Dialog", b, None))
+                self.le_la.setText(QtGui.QApplication.translate("Dialog", b, None))
             except:
                 pass
             
@@ -754,7 +755,7 @@ class Ui_Dialog(object):#05
             self.comboBox_standard.clear() 
             try:
                 b=ThreadStl_data.l_lst[key] 
-                self.label_l.setText(QtGui.QApplication.translate("Dialog", b, None))
+                self.le_la.setText(QtGui.QApplication.translate("Dialog", b, None))
                 pic='img_' + st + '.png' 
                 base=os.path.dirname(os.path.abspath(__file__))
                 joined_path = os.path.join(base, "pipe_data",pic)
@@ -765,7 +766,7 @@ class Ui_Dialog(object):#05
         elif typ=='PVC fittings':
             try:
                 b=Pvc_data.l_lst[key]
-                self.label_l.setText(QtGui.QApplication.translate("Dialog", b, None))
+                self.le_la.setText(QtGui.QApplication.translate("Dialog", b, None))
                 pic='img_' + st + '.png' 
                 base=os.path.dirname(os.path.abspath(__file__))
                 joined_path = os.path.join(base, "pipe_data",pic)
@@ -776,7 +777,7 @@ class Ui_Dialog(object):#05
         elif typ=='Circular duct fitting':
             try:
                 b=Duct_data.l_lst[key]
-                self.label_l.setText(QtGui.QApplication.translate("Dialog", b, None))
+                self.le_la.setText(QtGui.QApplication.translate("Dialog", b, None))
                 pic='img_' + st + '.png' 
                 base=os.path.dirname(os.path.abspath(__file__))
                 joined_path = os.path.join(base, "pipe_data",pic)
@@ -816,9 +817,9 @@ class Ui_Dialog(object):#05
             elif key=='05' :
                 material=self.comboBox_material.currentText()
                 try:
-                    self.label_lst.setText(QtGui.QApplication.translate("Dialog", str(material), None, QtGui.QApplication.UnicodeUTF8))
+                    self.le_last.setText(QtGui.QApplication.translate("Dialog", str(material), None, QtGui.QApplication.UnicodeUTF8))
                 except:
-                    self.label_lst.setText(QtGui.QApplication.translate("Dialog", str(material), None))
+                    self.le_last.setText(QtGui.QApplication.translate("Dialog", str(material), None))
                 if material=='Carbon steel':
                     ta=WeldStl_data.Tube_carbon
                 elif material=='Stainless steel':
@@ -1036,7 +1037,7 @@ class Ui_Dialog(object):#05
                         dia=WeldStl_data.reduc
                 elif material=='Stainless steel':
                     if st=='Sch10S' or st=='Sch20S':
-                        self.label_lst.setText(QtGui.QApplication.translate("Dialog", str(st), None))
+                        self.le_last.setText(QtGui.QApplication.translate("Dialog", str(st), None))
                         dia=WeldStl_data.reduc[:45]
                     else:
                         dia=WeldStl_data.reduc[:45]
@@ -1452,7 +1453,7 @@ class Ui_Dialog(object):#05
                         pic='img_ts_flange_socket.png'
                     elif st=='JIS5k':
                         dia=Pvc_data.flg_d2
-                        self.label_l.setText(QtGui.QApplication.translate("Dialog", 'JIS5kフランジ', None))
+                        self.le_la.setText(QtGui.QApplication.translate("Dialog", 'JIS5kフランジ', None))
                         pic='img_h00.png'
                     elif st=='JIS10k':
                         dia=Pvc_data.flg_d2
@@ -1576,19 +1577,13 @@ class Ui_Dialog(object):#05
                     label='Flange_Lid'    
                 label=self.comboBox_lst.currentText()[3:]
                 
-                #print(gengo,label,label2,label)  
                 obj = App.ActiveDocument.addObject("Part::FeaturePython",label)
                 obj.addProperty("App::PropertyEnumeration", "dia",label)
                 obj.dia=dia                
                 i=self.comboBox_dia.currentIndex()
                 obj.dia=dia[i]
                 obj.addProperty("App::PropertyEnumeration", "standard",label)
-
-                #label2=self.label_l.text()
-                #if gengo=='Japanese':
-                #    obj.Label=label2
-                #else:
-                #    obj.Label=label  
+                
 
                 if self.comboBox_material.currentIndex()==0:
                     obj.standard=WeldStl_data.flg_carbon
@@ -2609,6 +2604,8 @@ class Ui_Dialog(object):#05
             obj.addProperty("App::PropertyString", "fittings",label).fittings=fittings
             ParamDuct.duct_p(obj) 
             obj.ViewObject.Proxy= 0  
+        JPN=self.le_la.text()
+        obj.addProperty("App::PropertyString", "JPN",label).JPN=JPN    
         obj.addProperty("App::PropertyString", "type",label).type=type
         Gui.Selection.addSelection(obj)
         try:
@@ -2617,7 +2614,10 @@ class Ui_Dialog(object):#05
             pass
         Gui.Selection.clearSelection()
         Gui.Selection.addSelection(obj)  
-        Gui.ActiveDocument.ActiveView.fitAll()      
+        Gui.ActiveDocument.ActiveView.fitAll() 
+        Gui.activateWorkbench("DraftWorkbench")
+        Gui.Selection.addSelection(obj)
+        Gui.runCommand('Draft_Move',0)       
 
 class main():
         d = QtGui.QWidget()
