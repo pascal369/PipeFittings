@@ -2607,17 +2607,25 @@ class Ui_Dialog(object):#05
         JPN=self.le_la.text()
         obj.addProperty("App::PropertyString", "JPN",label).JPN=JPN    
         obj.addProperty("App::PropertyString", "type",label).type=type
-        Gui.Selection.addSelection(obj)
-        try:
-            Gui.runCommand('Draft_Move',0)
-        except:
-            pass
-        Gui.Selection.clearSelection()
-        Gui.Selection.addSelection(obj)  
-        Gui.ActiveDocument.ActiveView.fitAll() 
+
+        #objs=doc.Objects
+        #if obj:
+        #    last_obj=obj[-1] 
         Gui.activateWorkbench("DraftWorkbench")
         Gui.Selection.addSelection(obj)
-        Gui.runCommand('Draft_Move',0)       
+        Gui.runCommand('Draft_Move',0) 
+        
+        #Gui.Selection.addSelection(obj)
+        #try:
+        #    Gui.runCommand('Draft_Move',0)
+        #except:
+        #    pass
+        #Gui.Selection.clearSelection()
+        #Gui.Selection.addSelection(obj)  
+        #Gui.ActiveDocument.ActiveView.fitAll() 
+        #Gui.activateWorkbench("DraftWorkbench")
+        #Gui.Selection.addSelection(obj)
+        #Gui.runCommand('Draft_Move',0)       
 
 class main():
         d = QtGui.QWidget()
