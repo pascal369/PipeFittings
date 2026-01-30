@@ -1994,10 +1994,17 @@ class Ui_Dialog(object):#05
             ParamDuct.duct_p(obj) 
             obj.ViewObject.Proxy= 0  
 
+        doc = App.ActiveDocument
+        new_obj = doc.ActiveObject 
+
+        #'Assembly' オブジェクトを探して追加する
+        target_folder = doc.getObject('Assembly')
+        if target_folder:
+            target_folder.addObject(new_obj)
+            doc.recompute()    
+
         view = Gui.ActiveDocument.ActiveView
-        
         obj.ViewObject.Visibility = True
-        
         sep = coin.SoSeparator()
         trans = coin.SoTranslation()
         sep.addChild(trans)
