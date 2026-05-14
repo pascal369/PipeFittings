@@ -251,7 +251,7 @@ class threaded_p:
             p10=(h-r+1,0,p/2)
             p11=(h-r+1,0,-p/2)
             p12=(h-r+c0,0,z1)
-            p13=(h-r+c0,0,-z1)
+            p13=(h-r+c0+0.1,0,-z1-0.02)
             edge1 = Part.makeCircle(r, Base.Vector(p1), Base.Vector(0,1,0), 90+sr, 270-sr)
             edge2 = Part.makeLine(p2,p12)
             edge3 = Part.makeLine(p12,p13)
