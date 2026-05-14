@@ -14,7 +14,7 @@ from math import pi
 import Draft
 import FreeCAD as App
 from pivy import coin
-from PySide2 import QtCore
+#from PySide2 import QtCore
 from pipe_data import ParamWeldStlPipe
 from pipe_data import WeldStl_data
 from pipe_data import ParamStlPScw
@@ -83,7 +83,7 @@ class Ui_Dialog(object):#05
         self.label_5.setGeometry(QtCore.QRect(100, 145, 61, 16))
         self.label_5.setStyleSheet("color: gray;")
         self.spinBoxL=QtGui.QSpinBox(Dialog)
-        self.spinBoxL.setGeometry(130, 145, 60, 32)
+        self.spinBoxL.setGeometry(130, 145, 70, 32)
         self.spinBoxL.setMinimum(10)  # 最小値
         self.spinBoxL.setMaximum(5500)  # 最大値
         self.spinBoxL.setValue(5500)  # 
@@ -91,10 +91,10 @@ class Ui_Dialog(object):#05
         self.spinBoxL.setAlignment(QtCore.Qt.AlignCenter)
         #ステップ
         self.label_step = QtGui.QLabel('Step',Dialog)
-        self.label_step.setGeometry(QtCore.QRect(200, 145, 50, 16))
+        self.label_step.setGeometry(QtCore.QRect(210, 145, 50, 16))
         self.label_step.setStyleSheet("color: gray;")
         self.le_step = QtGui.QLineEdit('10',Dialog)
-        self.le_step.setGeometry(QtCore.QRect(200, 160, 50, 16))
+        self.le_step.setGeometry(QtCore.QRect(210, 160, 50, 16))
         self.le_step.setAlignment(QtCore.Qt.AlignCenter)
         #チェックボックス
         self.checkbox = QtGui.QCheckBox('Thread',Dialog)
