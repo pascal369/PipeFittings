@@ -2828,11 +2828,11 @@ class threaded_p:
             L=App.ActiveDocument.getObject(label).L
             L=float(L) 
             d0=d2-t
-            c1 = Part.makeCylinder(d2,L-2*L1,Base.Vector(0,0,0),Base.Vector(1,0,0))
-            #Part.show(c1)
-            c20 = Part.makeCylinder(d0,L,Base.Vector(0,0,0),Base.Vector(1,0,0))
-            #Part.show(c20)
+            
             if Thread==True:
+                c1 = Part.makeCylinder(d2,L-2*L1,Base.Vector(L1,0,0),Base.Vector(1,0,0))
+                c20 = Part.makeCylinder(d0,L-2*L1,Base.Vector(L1,0,0),Base.Vector(1,0,0))
+                c1=c1.cut(c20)
                 male_thread2(self)
                 c2=c00
                 c2.Placement=App.Placement(App.Vector(0,0,0),App.Rotation(App.Vector(0,1,0),90))
@@ -2845,7 +2845,8 @@ class threaded_p:
                 c1=c1.cut(c2)
             else:
                 c1 = Part.makeCylinder(d2,L,Base.Vector(0,0,0),Base.Vector(1,0,0))
-                c1=c1.cut(c20)  
+                c2 = Part.makeCylinder(d0,L,Base.Vector(0,0,0),Base.Vector(1,0,0))
+                c1=c1.cut(c2)  
                 
         obj.Shape=c1        
 
