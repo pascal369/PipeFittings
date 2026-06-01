@@ -630,7 +630,4 @@ class duct_p:
             c2=c01
             c2.Placement=App.Placement(App.Vector(z,0,0),App.Rotation(App.Vector(0,1,0),0))
             c1=c1.fuse(c2)
-        doc=App.ActiveDocument
-        Gui.Selection.addSelection(doc.Name,obj.Name)
-        Gui.runCommand('Draft_Move',0)    
         obj.Shape=c1
