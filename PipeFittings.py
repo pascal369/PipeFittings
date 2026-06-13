@@ -205,6 +205,7 @@ class Ui_Dialog(object):#05
                             myShape.standard=st[:3]
                             myShape.standard2=st[4:]
                          else:
+                            print('st=',str(st))
                             if st[-7:]=='JIS7.5k' :
                                 dia=WeldStl_data.flg_75[:10]
                             elif st[-5:]=='JIS5k' or st[-6:]=='JIS10k':
@@ -216,12 +217,16 @@ class Ui_Dialog(object):#05
                             myShape.standard=st[:5] 
                             myShape.standard2=st[6:]
                      elif self.comboBox_material.currentIndex()==1:
+                        #print(str(myShape.standard2))
+                        print(str(st))
                         if st[-7:]=='JIS7.5k' :
-                                dia=WeldStl_data.flg_75[:10]
+                            dia=WeldStl_data.flg_75[:10]
                         elif st[-5:]=='JIS5k' or st[-6:]=='JIS10k':
                             dia=WeldStl_data.flg_d[:15]
                         myShape.standard=st[:6] 
                         myShape.standard2=st[7:]
+
+                        
 
                         # obj.standard=WeldStl_data.Tube_stainless
                         # i=self.comboBox_standard.currentIndex()
@@ -1302,11 +1307,18 @@ class Ui_Dialog(object):#05
                     if st[:3]=='SGP':
                         obj.standard=st[:3]
                     else :
-                        obj.standard=st[:5]    
+                        obj.standard=st[:5] 
                 elif self.comboBox_material.currentIndex()==1:
                     obj.standard=WeldStl_data.Tube_stainless
                     i=self.comboBox_standard.currentIndex()
-                    obj.standard=WeldStl_data.Tube_stainless[i] 
+                    if st[:6]=='Sch10S':
+                        i1=0
+                    elif st[:6]=='Sch20S':
+                        i1=1
+                    elif st[:5]=='Sch40':
+                        i1=2  
+
+                    obj.standard=WeldStl_data.Tube_stainless[i1] 
                 obj.addProperty("App::PropertyEnumeration", "standard2",label)
                 if self.comboBox_material.currentIndex()==0:
                     obj.standard2=WeldStl_data.flg_carbon
@@ -1320,7 +1332,17 @@ class Ui_Dialog(object):#05
                 elif self.comboBox_material.currentIndex()==1:
                     obj.standard2=WeldStl_data.flg_stainless
                     i=self.comboBox_standard.currentIndex()
-                    obj.standard2=WeldStl_data.flg_stainless[i]  
+                    
+                    if st[-5:]=='JIS5k':
+                        obj.standard2=st[-5:]
+                    elif st[-7:]=='JIS7.5k':
+                        print('st=',str(st))
+                        obj.standard2=st[-7:] 
+                        #print(str(obj.standard2))
+                    else:
+                        obj.standard2=st[-6:]
+#
+                    #obj.standard2=WeldStl_data.flg_stainless[i]  
                 obj.addProperty("App::PropertyString", "L",label).L=str(L)    
             
             elif key=='08' :
