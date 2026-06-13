@@ -20,45 +20,46 @@ class welded_p:
         key=fittings[:2]
         material=App.ActiveDocument.getObject(label).material
         st=App.ActiveDocument.getObject(label).standard
-        #print(st)
+        st2=App.ActiveDocument.getObject(label).standard2
+        #print(str(st))
         dia=App.ActiveDocument.getObject(label).dia
         #print(dia)
         key_1=App.ActiveDocument.getObject(label).dia
         def flange(self):#00
             global c00
             global k00
+            #print(str(material))
             if material=='Carbon steel':
                 C0=0
-                if st=='JIS2k' or st[-5:]=='JIS2k':
+                if st2=='JIS2k' :
                     sa = WeldStl_data.JIS2k[key_1]
-                elif st=='JIS5k':
+                elif st2=='JIS5k':
                         sa = WeldStl_data.JIS5k[key_1]
-                elif st=='JIS7.5k' or st[-7:]=='JIS7.5k':
+                elif st2=='JIS7.5k' :
                         sa = WeldStl_data.JIS75k[key_1]
-                elif st=='JIS10k' or st[-6:]=='JIS10k':
+                elif st2=='JIS10k' :
                         sa = WeldStl_data.JIS10k[key_1]
-
-                elif st=='JIS16k' or st[-6:]=='JIS16k':
+                elif st2=='JIS16k':
                         sa = WeldStl_data.JIS16k[key_1]
-                elif st=='JIS20k' or st[-6:]=='JIS20k':
+                elif st2=='JIS20k':
                         sa = WeldStl_data.JIS20k[key_1]        
-
-                elif st=='JIS10k_Loose' or st[-12:]=='JIS10k_Loose':
+                elif st2=='JIS10k_Loose':
                         sa = WeldStl_data.JIS10k[key_1]
-
             elif material=='Stainless steel':
                 C0=0
-                if st=='JIS5k' or st[-5:]=='JIS5k':
+                if st2=='JIS2k':
+                    sa = WeldStl_data.JIS2k[key_1]
+                elif st2=='JIS5k' :
                     sa = WeldStl_data.JIS5k[key_1]
-                elif st=='JIS7.5k' or st[-7:]=='JIS7.5k':
+                elif st2=='JIS7.5k':
                     sa = WeldStl_data.JIS75k[key_1]
-                elif st=='JIS10k' or st[-6:]=='JIS10k':
+                elif st2=='JIS10k':
                     sa = WeldStl_data.JIS10k[key_1]
-                elif st=='JIS10k_Loose' or st[-12:]=='JIS10k_Loose':
+                elif st2=='JIS10k_Loose' :
                     sa = WeldStl_data.JIS5k[key_1]
                     C0=sa[11]
                     sa = WeldStl_data.JIS10k[key_1]
-                elif st=='JIS5k_Loose' or st[-11:]=='JIS5k_Loose':
+                elif st2=='JIS5k_Loose' :
                     sa = WeldStl_data.JIS5k[key_1]
                     C0=sa[11]
             if key=='11' or key=='12' or key=='14' or key=='15' or  key=='16':
@@ -385,15 +386,15 @@ class welded_p:
             #print(st)
             if st=='SGP':
                 t=float(sa[1])
-            if st=='Sch20':
+            elif st=='Sch20':
                 t=float(sa[2])
-            if st=='Sch40':
+            elif st=='Sch40':
                 t=float(sa[3])
-            if st=='Sch80':
+            elif st=='Sch80':
                 t=float(sa[5])
-            if st=='Sch10S':
+            elif st=='Sch10S':
                 t=float(sa[7])
-            if st=='Sch20S':
+            elif st=='Sch20S':
                 t=float(sa[8])
             if key=='06':
                 st=App.ActiveDocument.getObject(label).standard2
@@ -403,8 +404,9 @@ class welded_p:
                 st=App.ActiveDocument.getObject(label).standard
                 straight_p(self)
                 c2=c00
-                #print(t)
-                c2.Placement=App.Placement(App.Vector((t),0,0),App.Rotation(App.Vector(0,1,0),0))
+                print('key_1=',str(key_1))
+                print('t=',str(t))
+                c2.Placement=App.Placement(App.Vector(t,0,0),App.Rotation(App.Vector(0,1,0),0))
                 c1=c1.fuse(c2)
                 
             elif key=='07':
