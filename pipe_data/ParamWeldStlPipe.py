@@ -20,7 +20,7 @@ class welded_p:
         key=fittings[:2]
         material=App.ActiveDocument.getObject(label).material
         st=App.ActiveDocument.getObject(label).standard
-        st2=App.ActiveDocument.getObject(label).standard2
+       #st2=App.ActiveDocument.getObject(label).standard2
         #print(str(st))
         dia=App.ActiveDocument.getObject(label).dia
         #print(dia)
@@ -28,6 +28,8 @@ class welded_p:
         def flange(self):#00
             global c00
             global k00
+            standard2=st
+            st2=st
             #print(str(material))
             if material=='Carbon steel':
                 C0=0
