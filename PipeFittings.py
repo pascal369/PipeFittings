@@ -1198,6 +1198,7 @@ class Ui_Dialog(object):#05
                     obj.standard=WeldStl_data.flg_carbon
                     i=self.comboBox_standard.currentIndex()
                     obj.standard=WeldStl_data.flg_carbon[i]
+
                 elif self.comboBox_material.currentIndex()==1:
                     obj.standard=WeldStl_data.flg_stainless
                     i=self.comboBox_standard.currentIndex()
