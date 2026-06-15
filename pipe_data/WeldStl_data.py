@@ -11,8 +11,8 @@ l_lst={
 '16':'伸縮継手_7.5k'}
 
 mate=['Carbon steel','Stainless steel','Bronze','Cast Iron']
-flg_carbon=['JIS5k','JIS7.5k','JIS10k','JIS16k','JIS20k']
-flg_stainless=['JIS5k','JIS7.5k','JIS10k','JIS5k_Loose','JIS10k_Loose']
+flg_carbon=['JIS2k','JIS5k','JIS7.5k','JIS10k','JIS16k','JIS20k']
+flg_stainless=['JIS2k','JIS5k','JIS7.5k','JIS10k','JIS5k_Loose','JIS10k_Loose']
 exp_mate=['Carbon steel']
 exp_carbon=['JIS10k']
 
@@ -260,6 +260,7 @@ str_tube={
 # JIS2k
 #         d0,    d2,      d4,     d5,   t,      E,      n,      a,      b,      T,      r
 JIS2k={
+    
 '450':(  457.2,	 461,	 555,	 605,	22,	23,	16,     0,      0,      0,      0),
 '500':(  508.0,  512, 	 605,	 655,	22,	23,	20,     0,      0,      0,      0),
 '550':(  558.8,	 563,	 665,	 720,	24,	25,	20,     0,      0,      0,      0),
