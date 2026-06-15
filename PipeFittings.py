@@ -205,7 +205,7 @@ class Ui_Dialog(object):#05
                             myShape.standard=st[:3]
                             myShape.standard2=st[4:]
                          else:
-                            print('st=',str(st))
+                            #print('st=',str(st))
                             if st[-7:]=='JIS7.5k' :
                                 dia=WeldStl_data.flg_75[:10]
                             elif st[-5:]=='JIS5k' or st[-6:]=='JIS10k':
@@ -218,7 +218,7 @@ class Ui_Dialog(object):#05
                             myShape.standard2=st[6:]
                      elif self.comboBox_material.currentIndex()==1:
                         #print(str(myShape.standard2))
-                        print(str(st))
+                        #print(str(st))
                         if st[-7:]=='JIS7.5k' :
                             dia=WeldStl_data.flg_75[:10]
                         elif st[-5:]=='JIS5k' or st[-6:]=='JIS10k':
@@ -1194,7 +1194,7 @@ class Ui_Dialog(object):#05
                     obj.standard=WeldStl_data.flg_stainless
                     i=self.comboBox_standard.currentIndex()
                     obj.standard=WeldStl_data.flg_stainless[i]  
-                obj.addProperty("App::PropertyEnumeration", "Count",label)  
+                #obj.addProperty("App::PropertyString", "Count",label).Count='1'  
             elif key=='01':
                 label = 'Elbow'
                 obj = App.ActiveDocument.addObject("Part::FeaturePython",label)
@@ -1328,7 +1328,7 @@ class Ui_Dialog(object):#05
                     if st[-5:]=='JIS5k':
                         obj.standard2=st[-5:]
                     elif st[-7:]=='JIS7.5k':
-                        print('st=',str(st))
+                        #print('st=',str(st))
                         obj.standard2=st[-7:] 
                         #print(str(obj.standard2))
                     else:
@@ -2008,6 +2008,9 @@ class Ui_Dialog(object):#05
             ParamDuct.duct_p(obj) 
             obj.ViewObject.Proxy= 0  
 
+        obj.addProperty("App::PropertyString", "JPN",label).JPN=self.label_l.text()
+        obj.addProperty("App::PropertyString", "Count",label).Count='1' 
+        
         doc = App.ActiveDocument
         new_obj = doc.ActiveObject 
 
