@@ -549,18 +549,9 @@ class Ui_Dialog(object):#05
                 ta=Duct_data.y_st 
             elif key=='10' :
                 ta=Duct_data.damper_st    
-
-            #self.comboBox_standard.clear()
-            #try:
-            #    self.comboBox_standard.addItems(ta)
-            #except:
-            #    pass  
         try:
             #self.comboBox_standard.clear()
             self.comboBox_standard.addItems(ta)
-            
-            #print('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb')
-            #self.comboBox_dia.clear()
         except:
             pass    
 
@@ -576,7 +567,7 @@ class Ui_Dialog(object):#05
             if key=='00' or key=='09' :
                 if material=='Carbon steel':
                     if st=='JIS2k':
-                        dia=WeldStl_data.flg_d[17:]
+                        dia=WeldStl_data.flg_d[18:]
                     elif st=='JIS5k':
                         dia=WeldStl_data.flg_d[:25]
                     elif st=='JIS7.5k' :
@@ -1203,7 +1194,7 @@ class Ui_Dialog(object):#05
                     obj.standard=WeldStl_data.flg_stainless
                     i=self.comboBox_standard.currentIndex()
                     obj.standard=WeldStl_data.flg_stainless[i]  
-                  
+                obj.addProperty("App::PropertyEnumeration", "Count",label)  
             elif key=='01':
                 label = 'Elbow'
                 obj = App.ActiveDocument.addObject("Part::FeaturePython",label)
