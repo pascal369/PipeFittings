@@ -2009,7 +2009,7 @@ class Ui_Dialog(object):#05
             obj.ViewObject.Proxy= 0  
 
         obj.addProperty("App::PropertyString", "JPN",label).JPN=self.label_l.text()
-        obj.addProperty("App::PropertyString", "Count",label).Count='1' 
+        obj.addProperty("App::PropertyString", "count",label).count='1' 
         
         doc = App.ActiveDocument
         new_obj = doc.ActiveObject 
